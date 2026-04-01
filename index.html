@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>This is safe</title>
+<title>This Is Safe I Promise</title>
 
 <style>
     body {
@@ -14,11 +14,11 @@
         background: black;
         font-family: Impact, Arial Black, sans-serif;
         overflow: hidden;
+        color: white;
     }
 
     .container {
         text-align: center;
-        color: white;
     }
 
     h1 {
@@ -35,7 +35,6 @@
             0 0 50px magenta;
     }
 
-
     label {
         font-size: 24px;
         margin-right: 10px;
@@ -49,6 +48,22 @@
         background: black;
         color: white;
     }
+
+    button {
+        padding: 10px 20px;
+        font-size: 18px;
+        margin-left: 10px;
+        cursor: pointer;
+        border: 2px solid white;
+        background: black;
+        color: white;
+    }
+
+    .corner-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+    }
 </style>
 </head>
 
@@ -57,8 +72,22 @@
         <h1>This is a safe website</h1>
         <div>
             <label for="nameInput">SSN:</label>
-            <input type="text" id="nameInput" placeholder="Enter your numbers!">
+            <input type="text" id="nameInput" placeholder="Enter your Social Security Numbers">
+            <button onclick="submitName()">Enter</button>
         </div>
     </div>
+
+    <button class="corner-button" onclick="goToPage()">Next Page</button>
+
+<script>
+    function submitName() {
+        const name = document.getElementById('nameInput').value;
+        alert("HELLO " + name.toUpperCase() + "!!!");
+    }
+
+    function goToPage() {
+        window.location.href = "page2.html";
+    }
+</script>
 </body>
 </html>
