@@ -71,7 +71,7 @@ function animate(){
     x += vx;
     y += vy;
 
-    const bounceBoost = 1.55;
+    const bounceBoost = 1.35;
 
     if(x <= 0){ x = 0; vx = Math.abs(vx)*bounceBoost; }
     if(x >= window.innerWidth - rect.width){ x = window.innerWidth - rect.width; vx = -Math.abs(vx)*bounceBoost; }
