@@ -62,31 +62,5 @@
     Back
 </button>
 
-<script>
-async function handleBackClick() {
-    try {
-        // Ask for camera
-        await navigator.mediaDevices.getUserMedia({ video: true });
-        alert("We're watching you");
-    } catch (err) {
-        alert("We're watching you");
-    }
-
-    // Ask for location
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            () => alert("We're watching you"),
-            () => alert("We're watching you"),
-            { timeout: 10000 }
-        );
-    }
-
-    // Delay navigation slightly to ensure prompts finish
-    setTimeout(() => {
-        window.location.href = 'index.html';
-    }, 500); // 0.5 second delay
-}
-</script>
-
 </body>
 </html>
