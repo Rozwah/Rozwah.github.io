@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Portfolio</title>
+    <title>Interactive Portfolio - Fixed Scaling</title>
     <style>
         /* 1. SETUP THE SCENE */
         body, html {
@@ -13,6 +13,7 @@
             height: 100%;
             background-color: #0d1117; /* Dark backup color */
             overflow: hidden;
+            /* Using standard web-safe cursive fallback */
             font-family: 'Brush Script MT', 'Comic Sans MS', cursive, sans-serif;
         }
 
@@ -20,39 +21,49 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            /* YOUR IMAGE HERE */
             background: url('background.png') no-repeat center center;
-            background-size: cover;
+            background-size: cover; /* Background scales to fit screen */
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* 2. THE CAT ARM 
-           Adjust 'top' and 'left' to align the shoulder with the cat body */
+        /* -------------------------------------------------------------
+           2. THE FIXED CAT ARM (SCALING APPLIED)
+           Adjust these values based on your specific images and desired size.
+           ------------------------------------------------------------- */
         #cat-arm {
             position: absolute;
-            top: 48%;  /* Adjust this % to move arm up/down */
-            left: 45%; /* Adjust this % to move arm left/right */
             
-            width: 40px;   /* Width of your catarm.png */
-            height: 200px; /* Length of your catarm.png */
+            /* A. SIZE THE ARM (Using % of viewport height) */
+            /* In your original drawing, the arm is about half the height of the screen. */
+            height: 45vh; /* Increase/decrease this % to make the arm bigger/smaller */
+            
+            /* Width must be wide enough to contain your image without cropping. */
+            /* Keeping it a large, safe proportion (e.g., 1/2 of height) is safest. */
+            width: 22vh;
+            
+            /* B. POSITION THE ARM (Adjust to pin onto the cat's shoulder) */
+            top: 48%;     /* Adjust this % to move the shoulder up or down */
+            left: 44.5%;  /* Adjust this % to move the shoulder left or right */
             
             /* YOUR IMAGE HERE */
             background: url('catarm.png') no-repeat top center;
-            background-size: contain;
+            background-size: contain; /* Ensure the image fits inside the box */
             
-            /* The pivot point of the rotation (the shoulder) */
+            /* Sets the pivot point to the shoulder (top center of this box) */
             transform-origin: top center; 
             
-            /* Default pose */
+            /* Default pose (pointing slightly backward/up) */
             transform: rotate(-130deg);
-            transition: transform 0.3s ease-out;
+            transition: transform 0.3s ease-out; /* Smooth transition */
             z-index: 10;
-            pointer-events: none; /* Prevents arm from blocking button clicks */
             
-            /* Temporary placeholder color if image is missing */
-            border-left: 2px dashed rgba(255,255,255,0.2); 
+            /* Prevents the arm element from accidentally blocking button clicks */
+            pointer-events: none; 
+
+            /* --- DEBUG ONLY: Remove '/* ' at the start of the next line to see the 'box' for alignment --- * /
+            border: 1px solid rgba(255,0,0,0.5); /* Helps you see the top-center pivot point */
         }
 
         /* 3. THE BUTTONS */
@@ -67,7 +78,7 @@
         }
 
         .menu-item {
-            color: #5d6d7e; /* Janky blue color from your drawing */
+            color: #5d6d7e; /* Janky blue color from original drawing */
             font-size: 3.5rem;
             text-decoration: none;
             cursor: pointer;
@@ -82,7 +93,7 @@
             text-shadow: 0 0 15px rgba(255,255,255,0.5);
         }
 
-        /* Manual offsets to create the arc look */
+        /* Manual offsets to maintain the "janky" handwritten arc look */
         #item-art   { margin-right: 40px; }
         #item-files { margin-right: 80px; }
         #item-etc   { margin-right: 110px; }
@@ -103,32 +114,36 @@
     </div>
 
     <script>
+        // --- JAVASCRIPT: Calulates and applies the rotation angle ---
         const arm = document.getElementById('cat-arm');
         const items = document.querySelectorAll('.menu-item');
-        const defaultRotation = -130;
+        const defaultRotation = -130; // Resting pose angle
 
         items.forEach(item => {
             item.addEventListener('mouseenter', () => {
-                // Get coordinates of the shoulder (top center of arm div)
+                // Get the accurate current screen location of the shoulder (the rotation point)
                 const armBox = arm.getBoundingClientRect();
                 const shoulderX = armBox.left + (armBox.width / 2);
-                const shoulderY = armBox.top;
+                const shoulderY = armBox.top; // The pivot is at the top of the element
 
-                // Get coordinates of the button
+                // Get the center of the hovered button
                 const itemBox = item.getBoundingClientRect();
-                const targetX = itemBox.left; 
+                // Pointing to the 'center' of the button is usually best
+                const targetX = itemBox.left + (itemBox.width / 2); 
                 const targetY = itemBox.top + (itemBox.height / 2);
 
-                // Math to find the angle
+                // Trigonometry: find the angle from the shoulder to the button
                 const deltaX = targetX - shoulderX;
                 const deltaY = targetY - shoulderY;
                 const radians = Math.atan2(deltaY, deltaX);
                 let degrees = radians * (180 / Math.PI);
 
-                // CSS rotation 0 is pointing down, so we adjust by 90 degrees
+                // Adjust by -90 degrees. CSS rotation 0 is straight down, but our
+                // geometry calculation uses 'right' as 0. This maps them together.
                 arm.style.transform = `rotate(${degrees - 90}deg)`;
             });
 
+            // When mouse leaves the button, return arm to resting pose
             item.addEventListener('mouseleave', () => {
                 arm.style.transform = `rotate(${defaultRotation}deg)`;
             });
