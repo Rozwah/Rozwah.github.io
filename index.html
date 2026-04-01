@@ -1,95 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Portfolio</title>
+    <style>
+        /* 1. SETUP THE SCENE */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0d1117; /* Dark backup color */
+            overflow: hidden;
+            font-family: 'Brush Script MT', 'Comic Sans MS', cursive, sans-serif;
+        }
 
-<style>
-    body{
-        margin:0;
-        height:100vh;
-        overflow:hidden;
-        background:#111;
-        cursor: url('CatCursor.png'), auto; /* Custom cursor */
-    }
+        #canvas {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            /* YOUR IMAGE HERE */
+            background: url('background.png') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    #catgun{
-        position:absolute;
-        width:200px;
-        user-select:none;
-        pointer-events:auto;
-    }
-</style>
+        /* 2. THE CAT ARM 
+           Adjust 'top' and 'left' to align the shoulder with the cat body */
+        #cat-arm {
+            position: absolute;
+            top: 48%;  /* Adjust this % to move arm up/down */
+            left: 45%; /* Adjust this % to move arm left/right */
+            
+            width: 40px;   /* Width of your catarm.png */
+            height: 200px; /* Length of your catarm.png */
+            
+            /* YOUR IMAGE HERE */
+            background: url('catarm.png') no-repeat top center;
+            background-size: contain;
+            
+            /* The pivot point of the rotation (the shoulder) */
+            transform-origin: top center; 
+            
+            /* Default pose */
+            transform: rotate(-130deg);
+            transition: transform 0.3s ease-out;
+            z-index: 10;
+            pointer-events: none; /* Prevents arm from blocking button clicks */
+            
+            /* Temporary placeholder color if image is missing */
+            border-left: 2px dashed rgba(255,255,255,0.2); 
+        }
+
+        /* 3. THE BUTTONS */
+        .nav-container {
+            position: absolute;
+            right: 10%;
+            top: 20%;
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            align-items: flex-end;
+        }
+
+        .menu-item {
+            color: #5d6d7e; /* Janky blue color from your drawing */
+            font-size: 3.5rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            padding-right: 20px;
+        }
+
+        .menu-item:hover {
+            color: #ffffff;
+            transform: translateX(-10px);
+            text-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+
+        /* Manual offsets to create the arc look */
+        #item-art   { margin-right: 40px; }
+        #item-files { margin-right: 80px; }
+        #item-etc   { margin-right: 110px; }
+
+    </style>
 </head>
-
 <body>
 
-<img src="CatGun.png" id="catgun" alt="CatGun">
+    <div id="canvas">
+        <div id="cat-arm"></div>
 
-<script>
-const img = document.getElementById("catgun");
-let x = window.innerWidth * 0.2;
-let y = window.innerHeight * 0.4;
-let vx = 0;
-let vy = 0;
+        <div class="nav-container">
+            <a href="page2.html" class="menu-item" id="item-projects">Projects</a>
+            <a href="page3.html" class="menu-item" id="item-art">Art</a>
+            <a href="page4.html" class="menu-item" id="item-files">Files</a>
+            <a href="page5.html" class="menu-item" id="item-etc">Etc.</a>
+        </div>
+    </div>
 
-img.style.left = x + "px";
-img.style.top = y + "px";
+    <script>
+        const arm = document.getElementById('cat-arm');
+        const items = document.querySelectorAll('.menu-item');
+        const defaultRotation = -130;
 
-let mouseX = 0;
-let mouseY = 0;
+        items.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                // Get coordinates of the shoulder (top center of arm div)
+                const armBox = arm.getBoundingClientRect();
+                const shoulderX = armBox.left + (armBox.width / 2);
+                const shoulderY = armBox.top;
 
-document.addEventListener("mousemove", (e)=>{
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-});
+                // Get coordinates of the button
+                const itemBox = item.getBoundingClientRect();
+                const targetX = itemBox.left; 
+                const targetY = itemBox.top + (itemBox.height / 2);
 
-function animate(){
-    const rect = img.getBoundingClientRect();
-    const centerX = rect.left + rect.width/2;
-    const centerY = rect.top + rect.height/2;
+                // Math to find the angle
+                const deltaX = targetX - shoulderX;
+                const deltaY = targetY - shoulderY;
+                const radians = Math.atan2(deltaY, deltaX);
+                let degrees = radians * (180 / Math.PI);
 
-    const dx = centerX - mouseX;
-    const dy = centerY - mouseY;
-    const distance = Math.sqrt(dx*dx + dy*dy) || 1;
+                // CSS rotation 0 is pointing down, so we adjust by 90 degrees
+                arm.style.transform = `rotate(${degrees - 90}deg)`;
+            });
 
-    const dirX = dx / distance;
-    const dirY = dy / distance;
-
-    let speed;
-    if(distance < 80){ speed = 1.2; }
-    else if(distance < 200){ speed = 14; }
-    else{ speed = 0.6; }
-
-    vx += dirX * speed;
-    vy += dirY * speed;
-
-    vx *= 0.95;
-    vy *= 0.95;
-
-    x += vx;
-    y += vy;
-
-    const bounceBoost = 1.35;
-
-    if(x <= 0){ x = 0; vx = Math.abs(vx)*bounceBoost; }
-    if(x >= window.innerWidth - rect.width){ x = window.innerWidth - rect.width; vx = -Math.abs(vx)*bounceBoost; }
-    if(y <= 0){ y = 0; vy = Math.abs(vy)*bounceBoost; }
-    if(y >= window.innerHeight - rect.height){ y = window.innerHeight - rect.height; vy = -Math.abs(vy)*bounceBoost; }
-
-    img.style.left = x + "px";
-    img.style.top = y + "px";
-
-    requestAnimationFrame(animate);
-}
-
-animate();
-
-img.addEventListener("click", ()=>{
-    window.location.href = "page2.html";
-});
-</script>
-
+            item.addEventListener('mouseleave', () => {
+                arm.style.transform = `rotate(${defaultRotation}deg)`;
+            });
+        });
+    </script>
 </body>
 </html>
