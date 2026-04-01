@@ -10,8 +10,9 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #05050a;
+            background-color: #05050a; /* Dark background from your image */
             overflow: hidden;
+            /* Bold cursive font */
             font-family: 'Brush Script MT', 'Comic Sans MS', cursive, sans-serif;
         }
 
@@ -19,49 +20,52 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            /* If your cat's shoulder moves too much when resizing the browser, 
-               you might need to change 'cover' to 'contain' or '100% 100%' */
+            /* If your cat's shoulder moves too much when resizing, change 'cover' to 'contain' */
             background: url('background.png') no-repeat center center;
             background-size: cover; 
         }
 
-        /* --- 1. THE INVISIBLE PIVOT POINT --- */
-        /* This is the exact location of the cat's shoulder on the screen. */
+        /* --- 1. THE INVISIBLE SHOULDER PIVOT POINT --- */
+        /* We position this invisible div exactly where the cat's shoulder is. */
         #shoulder-pivot {
             position: absolute;
             
-            /* TWEAK THESE to place the pivot exactly over your background cat's shoulder */
-            top: 60vh;   
-            left: 35vw;  
+            /* TWEAK THESE Percentage (%) units to match your specific background.png cat shoulder */
+            top: 60vh;   /* 60% down from the top (estimated from image_0.png) */
+            left: 35vw;  /* 35% in from the left (estimated from image_0.png) */
             
+            /* Give it zero size so it is just a point */
             width: 0; 
             height: 0;
-            z-index: 10;
+            z-index: 10; /* Above background, below menu */
         }
 
         /* --- 2. THE VISUAL CAT ARM --- */
         #cat-arm {
             position: absolute;
-            width: 15vw;       
-            height: 120vh;     
             
-            left: -7.5vw;      
+            /* SIZING RELATIVE TO VIEWPORT: Makes it huge like the cat */
+            width: 15vw;       /* Thickness of the arm */
+            height: 120vh;     /* Make it super long so it always reaches the menu */
             
-            /* CHANGE 1: Anchor the arm to the bottom of the pivot point */
-            bottom: 0;            
+            /* ATTACHMENT POSITION: */
+            /* This is the key. We center the width and position the arm relative to the invisible shoulder. */
+            left: -7.5vw;      /* Half of the width (15/2), centers the arm horizontally on the shoulder point */
+            bottom: 0;         /* Puts the bottom of the catarm.png exactly at the shoulder point */
 
-            /* CHANGE 2: Align the background image to the bottom */
+            /* Using 'bottom center' alignment and pivot because that's where the shoulder joint is in the file */
             background: url('catarm.png') no-repeat bottom center;
             background-size: contain;
             
-            /* CHANGE 3: Pivot from the bottom center */
+            /* Change the pivot point to the bottom-center of this element */
             transform-origin: bottom center; 
             
             transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
-            pointer-events: none;
+            z-index: 10;
+            pointer-events: none; /* Mouse ignores the arm image */
         }
 
-        /* --- NAVIGATION LINKS --- */
+        /* --- NAVIGATION LINKS (MENU) --- */
         .nav-arc {
             position: absolute;
             top: 15%;
@@ -74,16 +78,15 @@
         }
 
         .menu-btn {
-            color: #5d6d7e; 
-            font-size: 8vh;  
+            color: #d1d9e2; /* Light text color from your image */
+            font-size: 8vh;  /* Large text size */
             font-weight: bold;
             text-decoration: none;
             cursor: pointer;
             transition: color 0.3s, transform 0.3s;
             white-space: nowrap;
             text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
-            /* Add a tiny padding to make hover hitboxes more forgiving */
-            padding: 10px; 
+            padding: 10px; /* Bigger hit target */
         }
 
         .menu-btn:hover {
@@ -119,8 +122,10 @@
         const arm = document.getElementById('cat-arm');
         const buttons = document.querySelectorAll('.menu-btn');
         
-        // This is the angle the arm sits at when not hovering
-        const restAngle = -35; 
+        // --- GOAL: Set resting position to 40 degrees (40deg CSS rotation) ---
+        const restAngle = 40; 
+        
+        // Apply the resting angle immediately
         arm.style.transform = `rotate(${restAngle}deg)`;
 
         buttons.forEach(btn => {
@@ -130,18 +135,19 @@
                 const shoulderX = pivotRect.left;
                 const shoulderY = pivotRect.top;
 
-                // 2. Get the coordinates of the button being hovered
+                // 2. Get the coordinates of the button (aiming for middle-left)
                 const btnRect = btn.getBoundingClientRect();
                 const targetX = btnRect.left; 
-                const targetY = btnRect.top + (btnRect.height / 2); // Middle-left of the text
+                const targetY = btnRect.top + (btnRect.height / 2);
 
-                // 3. Do the trig math
+                // 3. Do the math
                 const dx = targetX - shoulderX;
                 const dy = targetY - shoulderY;
                 let angle = Math.atan2(dy, dx) * (180 / Math.PI);
                 
-                // 4. Rotate it! (-90 assumes your catarm.png is pointing straight down in the file)
-                arm.style.transform = `rotate(${angle - 65}deg)`;
+                // 4. Update the arm rotation
+                // '+ 90' accounts for the pivot point being at the bottom of the image
+                arm.style.transform = `rotate(${angle + 90}deg)`;
             });
 
             btn.addEventListener('mouseleave', () => {
