@@ -42,20 +42,20 @@
         /* --- 2. THE VISUAL CAT ARM --- */
         #cat-arm {
             position: absolute;
+            width: 15vw;       
+            height: 120vh;     
             
-            /* Sizing relative to the viewport so it stays huge */
-            width: 15vw;       /* Thickness of the arm */
-            height: 120vh;     /* Make it super long so it always reaches the menu */
+            left: -7.5vw;      
             
-            /* Center the arm precisely on the invisible pivot point */
-            left: -7.5vw;      /* Exactly half of the width, so the pivot is in the middle */
-            top: 0;            /* Assuming the top of your image is the shoulder */
+            /* CHANGE 1: Anchor the arm to the bottom of the pivot point */
+            bottom: 0;            
 
-            background: url('catarm.png') no-repeat top center;
+            /* CHANGE 2: Align the background image to the bottom */
+            background: url('catarm.png') no-repeat bottom center;
             background-size: contain;
             
-            /* We now pivot from the very top-center of this element */
-            transform-origin: top center; 
+            /* CHANGE 3: Pivot from the bottom center */
+            transform-origin: bottom center; 
             
             transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
             pointer-events: none;
