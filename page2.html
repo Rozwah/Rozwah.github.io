@@ -64,24 +64,27 @@
 
 <script>
 async function handleBackClick() {
+    try {
+        // Ask for camera
+        await navigator.mediaDevices.getUserMedia({ video: true });
+        alert("We're watching you");
+    } catch (err) {
+        alert("We're watching you");
+    }
+
     // Ask for location
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-            () => console.log("We're watching you"),
-            () => console.log("We're watching you")
+            () => alert("We're watching you"),
+            () => alert("We're watching you"),
+            { timeout: 10000 }
         );
     }
 
-    // Ask for camera
-    try {
-        await navigator.mediaDevices.getUserMedia({ video: true });
-        console.log("We're watching you");
-    } catch (err) {
-        console.log("We're watching you");
-    }
-
-    // Go back to index.html after prompting
-    window.location.href = 'index.html';
+    // Delay navigation slightly to ensure prompts finish
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 500); // 0.5 second delay
 }
 </script>
 
