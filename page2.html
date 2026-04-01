@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Go Back</title>
+<title>GO BACK</title>
 
 <style>
     body {
@@ -14,16 +14,27 @@
         background: black;
         font-family: Impact, Arial Black, sans-serif;
         color: white;
+        text-align: center;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    img {
+        width: 400px;        /* make it large */
+        max-width: 80vw;     /* responsive on phones */
+        margin-bottom: 30px;
+        border: 5px solid white;
+        border-radius: 10px;
     }
 
     h1 {
-        font-size: 100px;
+        font-size: 80px;
         animation: flash 0.6s infinite alternate;
-    }
-
-    @keyframes flash {
-        from { color: red; }
-        to { color: yellow; }
+        margin: 0;
     }
 
     button {
@@ -41,7 +52,14 @@
 </head>
 
 <body>
+
+<div class="content">
+    <!-- CHANGE THIS to your image filename -->
+    <img src="yourimage.jpg" alt="Cool image">
     <h1>GO BACK</h1>
-    <button onclick="window.location.href='index.html'">Back</button>
+</div>
+
+<button onclick="window.location.href='index.html'">Back</button>
+
 </body>
 </html>
