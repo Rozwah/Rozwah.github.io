@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Catch the CatGun</title>
+<title>Home</title>
 
 <style>
     body{
@@ -17,8 +17,8 @@
     #catgun{
         position:absolute;
         width:200px;
-        transition: top 0.25s ease, left 0.25s ease;
         user-select:none;
+        pointer-events:auto;
     }
 </style>
 </head>
@@ -30,34 +30,79 @@
 <script>
 const img = document.getElementById("catgun");
 
-let side = 0;
-
 // start position
-img.style.top = "40%";
-img.style.left = "10%";
+let x = window.innerWidth * 0.2;
+let y = window.innerHeight * 0.4;
 
-document.addEventListener("mousemove", (e) => {
-    const rect = img.getBoundingClientRect();
+let vx = 0;
+let vy = 0;
 
-    const distX = Math.abs(e.clientX - (rect.left + rect.width/2));
-    const distY = Math.abs(e.clientY - (rect.top + rect.height/2));
+img.style.left = x + "px";
+img.style.top = y + "px";
 
-    // if cursor gets close, move image
-    if(distX < 150 && distY < 150){
-        side = 1 - side;
+let mouseX = 0;
+let mouseY = 0;
 
-        if(side === 0){
-            img.style.left = "10%";
-            img.style.top = Math.random()*70 + "%";
-        } else {
-            img.style.left = "70%";
-            img.style.top = Math.random()*70 + "%";
-        }
-    }
+document.addEventListener("mousemove", (e)=>{
+    mouseX = e.clientX;
+    mouseY = e.clientY;
 });
 
-// if somehow clicked
-img.addEventListener("click", () => {
+function animate(){
+    const rect = img.getBoundingClientRect();
+    const centerX = rect.left + rect.width/2;
+    const centerY = rect.top + rect.height/2;
+
+    const dx = centerX - mouseX;
+    const dy = centerY - mouseY;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+
+    // direction away from cursor
+    const dirX = dx / distance;
+    const dirY = dy / distance;
+
+    // SPEED LOGIC
+    let speed;
+
+    if(distance < 80){
+        // cursor is on it -> slow movement
+        speed = 1.2;
+    }
+    else if(distance < 200){
+        // being chased -> fast acceleration
+        speed = 12;
+    }
+    else{
+        // idle drift
+        speed = 0.5;
+    }
+
+    vx += dirX * speed;
+    vy += dirY * speed;
+
+    // friction
+    vx *= 0.9;
+    vy *= 0.9;
+
+    x += vx;
+    y += vy;
+
+    // bounce off walls
+    if(x < 0) x = 0;
+    if(y < 0) y = 0;
+    if(x > window.innerWidth - rect.width) x = window.innerWidth - rect.width;
+    if(y > window.innerHeight - rect.height) y = window.innerHeight - rect.height;
+
+    img.style.left = x + "px";
+    img.style.top = y + "px";
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+// click to go to next page
+img.addEventListener("click", ()=>{
     window.location.href = "page2.html";
 });
 </script>
