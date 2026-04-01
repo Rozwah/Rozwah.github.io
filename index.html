@@ -5,141 +5,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Archive</title>
     <style>
-        :root {
-            /* The blue from your sketch */
-            --janky-blue: #88c0d0;
-            /* How thick the arm should be relative to the screen width */
-            --arm-thickness: 12%; 
-        }
-
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             background-color: #05050a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             overflow: hidden;
-            font-family: 'Brush Script MT', cursive, sans-serif;
+            /* Using a bold cursive font to match your 'janky' style */
+            font-family: 'Brush Script MT', 'Comic Sans MS', cursive, sans-serif;
         }
 
-        /* This container locks the 5049x5254 proportions.
-           Everything inside (arm, buttons) uses % of THIS container,
-           so they never move out of place.
-        */
-        #master-stage {
+        #scene-container {
             position: relative;
-            aspect-ratio: 5049 / 5254;
+            width: 100vw;
             height: 100vh;
-            width: auto;
+            /* This makes the image fill the screen completely again */
             background: url('background.png') no-repeat center center;
-            background-size: contain;
+            background-size: cover; 
         }
 
-        /* --- THE ARM --- */
+        /* --- THE CAT ARM (ENLARGED) --- */
         #cat-arm {
             position: absolute;
             
-            /* POSITION: Percentage of the background where the shoulder sits */
-            top: 48.5%;  
-            left: 45.8%; 
+            /* ADJUST THESE TWO to move the shoulder joint */
+            top: 48%;  
+            left: 45%; 
 
-            /* SIZE: This makes your 200px image appear large */
-            width: var(--arm-thickness); 
-            height: 35%; /* Long enough to reach the buttons */
+            /* WIDTH: Increased this to make the arm thick like the text */
+            width: 10vh; 
+            /* HEIGHT: Adjusted to keep the arm long enough to point */
+            height: 40vh; 
 
             background: url('catarm.png') no-repeat top center;
-            background-size: contain; /* Scales the small image up to fill the width */
+            background-size: contain;
             
-            /* Pivot point: Top Center of the arm image */
+            /* Pivot point remains the shoulder */
             transform-origin: top center; 
-            transform: rotate(-135deg);
-            
-            /* Smooth movement */
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: rotate(-130deg);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
             z-index: 10;
-            pointer-events: none; /* Mouse goes 'through' the arm to hit buttons */
+            pointer-events: none;
         }
 
-        /* --- THE BUTTONS --- */
-        .nav-menu {
+        /* --- NAVIGATION LINKS --- */
+        .nav-arc {
             position: absolute;
             top: 15%;
-            right: 5%;
+            right: 8%;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 4vh;
             align-items: flex-end;
+            z-index: 20;
         }
 
-        .btn {
-            color: var(--janky-blue);
-            font-size: 5cvi; /* Responsive font based on container size */
-            text-decoration: none;
+        .menu-btn {
+            color: #5d6d7e; /* The blue color from your drawing */
+            font-size: 8vh;  /* Large text size */
             font-weight: bold;
-            transition: 0.3s;
+            text-decoration: none;
             cursor: pointer;
-            padding: 10px;
+            transition: color 0.3s, transform 0.3s;
+            white-space: nowrap;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
         }
 
-        .btn:hover {
-            color: #fff;
-            transform: scale(1.1);
+        .menu-btn:hover {
+            color: #ffffff;
+            transform: scale(1.05) translateX(-10px);
         }
 
-        /* Janky Arc Offsets */
-        #b1 { margin-right: 60px; }
-        #b2 { margin-right: 35px; }
-        #b3 { margin-right: 15px; }
+        /* Handwritten-style Arc Offsets */
+        #link1 { margin-right: 60px; }
+        #link2 { margin-right: 30px; }
+        #link3 { margin-right: 10px; }
+        #link4 { margin-right: 0px; }
 
     </style>
 </head>
 <body>
 
-    <div id="master-stage">
+    <div id="scene-container">
         <div id="cat-arm"></div>
 
-        <nav class="nav-menu">
-            <a href="page2.html" class="btn" id="b1">projects</a>
-            <a href="page3.html" class="btn" id="b2">art</a>
-            <a href="page4.html" class="btn" id="b3">files</a>
-            <a href="page5.html" class="btn" id="b4">etc</a>
+        <nav class="nav-arc">
+            <a href="page2.html" class="menu-btn" id="link1">projects</a>
+            <a href="page3.html" class="menu-btn" id="link2">art</a>
+            <a href="page4.html" class="menu-btn" id="link3">files</a>
+            <a href="page5.html" class="menu-btn" id="link4">etc</a>
         </nav>
     </div>
 
     <script>
         const arm = document.getElementById('cat-arm');
-        const buttons = document.querySelectorAll('.btn');
-        const defaultRotation = -135;
+        const buttons = document.querySelectorAll('.menu-btn');
+        const restAngle = -130;
 
         buttons.forEach(btn => {
             btn.addEventListener('mouseenter', () => {
                 const armRect = arm.getBoundingClientRect();
                 const btnRect = btn.getBoundingClientRect();
 
-                // 1. Find the shoulder (Pivot Point)
+                // Shoulder location
                 const shoulderX = armRect.left + (armRect.width / 2);
                 const shoulderY = armRect.top;
 
-                // 2. Find the Target (Button Center)
+                // Button location (pointing to the left side of the text)
                 const targetX = btnRect.left;
                 const targetY = btnRect.top + (btnRect.height / 2);
 
-                // 3. The Math
-                // We calculate the angle $\theta$ using the arc tangent:
-                // $$\theta = \operatorname{atan2}(y_{target} - y_{shoulder}, x_{target} - x_{shoulder})$$
                 const dx = targetX - shoulderX;
                 const dy = targetY - shoulderY;
+                
                 let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-
-                // Offset by 90 because the arm image is drawn vertically
+                
+                // Adjusting by 90 because our 'arm' image is vertical
                 arm.style.transform = `rotate(${angle - 90}deg)`;
             });
 
             btn.addEventListener('mouseleave', () => {
-                arm.style.transform = `rotate(${defaultRotation}deg)`;
+                arm.style.transform = `rotate(${restAngle}deg)`;
             });
         });
     </script>
