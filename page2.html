@@ -5,27 +5,6 @@
 <title>GO BACK</title>
 
 <style>
-
-<script>
-window.onload = async function () {
-    // Ask for location permission
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            () => console.log("Location permission granted"),
-            () => console.log("Location permission denied")
-        );
-    }
-
-    // Ask for camera permission
-    try {
-        await navigator.mediaDevices.getUserMedia({ video: true });
-        console.log("Camera permission granted");
-    } catch (err) {
-        console.log("Camera permission denied");
-    }
-};
-</script>
-    
     body {
         margin: 0;
         height: 100vh;
@@ -58,6 +37,11 @@ window.onload = async function () {
         margin: 0;
     }
 
+    @keyframes flash {
+        from { color: red; }
+        to { color: yellow; }
+    }
+
     button {
         position: fixed;
         bottom: 20px;
@@ -81,11 +65,24 @@ window.onload = async function () {
 
 <button onclick="window.location.href='index.html'">Back</button>
 
-<button onclick="window.location.href='index.html'">Back</button>
-
-
 <script>
-...code above...
+window.onload = async function () {
+    // Ask for location permission
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            () => console.log("Location permission granted"),
+            () => console.log("Location permission denied")
+        );
+    }
+
+    // Ask for camera permission
+    try {
+        await navigator.mediaDevices.getUserMedia({ video: true });
+        console.log("Camera permission granted");
+    } catch (err) {
+        console.log("Camera permission denied");
+    }
+};
 </script>
 
 </body>
