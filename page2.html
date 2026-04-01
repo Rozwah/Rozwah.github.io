@@ -75,8 +75,8 @@ async function handleBackClick() {
     // Ask for location
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-            () => alert("We're watching you"),
-            () => alert("We're watching you"),
+            () => alert("Don't forget."),
+            () => alert("Don't forget."),
             { timeout: 10000 }
         );
     }
