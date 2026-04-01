@@ -5,95 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Archive</title>
     <style>
-        :root {
-            /* We define the original image ratio here to keep everything proportional */
-            --img-width: 5049;
-            --img-height: 5254;
-            --aspect-ratio: calc(var(--img-width) / var(--img-height));
-        }
-
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #05050a; /* Deep void black */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: #05050a;
             overflow: hidden;
+            /* Using a bold cursive font to match your 'janky' style */
             font-family: 'Brush Script MT', 'Comic Sans MS', cursive, sans-serif;
         }
 
-        /* This container maintains your drawing's proportions regardless of screen size */
         #scene-container {
             position: relative;
-            /* This math ensures the image always fits the screen without cutting off */
-            width: min(100vw, calc(100vh * var(--aspect-ratio)));
-            height: min(100vh, calc(100vw / var(--aspect-ratio)));
-            
+            width: 100vw;
+            height: 100vh;
+            /* This makes the image fill the screen completely again */
             background: url('background.png') no-repeat center center;
-            background-size: 100% 100%;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            background-size: cover; 
         }
 
-        /* THE ARM
-           Since the arm is 200px and the background is 5049px, 
-           the arm is roughly 4% of the width. */
+        /* --- THE CAT ARM (ENLARGED) --- */
         #cat-arm {
             position: absolute;
             
-            /* --- POSITIONING: Adjust these % to pin the shoulder --- */
-            top: 48.5%;  
-            left: 46.2%; 
+            /* ADJUST THESE TWO to move the shoulder joint */
+            top: 48%;  
+            left: 45%; 
 
-            /* --- SCALING: Adjust this % to match the body size --- */
-            width: 4.5%; 
-            height: 25%; /* Making the box tall so the arm has room to swing */
+            /* WIDTH: Increased this to make the arm thick like the text */
+            width: 10vh; 
+            /* HEIGHT: Adjusted to keep the arm long enough to point */
+            height: 40vh; 
 
             background: url('catarm.png') no-repeat top center;
             background-size: contain;
             
+            /* Pivot point remains the shoulder */
             transform-origin: top center; 
-            transform: rotate(-140deg);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Added a little 'bounce' */
+            transform: rotate(-130deg);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
             z-index: 10;
             pointer-events: none;
-            
-            /* border: 1px solid red; /* Uncomment to see the shoulder pivot point while testing */
         }
 
-        /* NAVIGATION ARC */
+        /* --- NAVIGATION LINKS --- */
         .nav-arc {
             position: absolute;
             top: 15%;
-            right: 5%;
+            right: 8%;
             display: flex;
             flex-direction: column;
-            gap: 2vh;
+            gap: 4vh;
             align-items: flex-end;
             z-index: 20;
         }
 
         .menu-btn {
-            color: #839496; /* Desaturated janky blue */
-            font-size: clamp(1.5rem, 5vh, 4rem); /* Responsive font size */
+            color: #5d6d7e; /* The blue color from your drawing */
+            font-size: 8vh;  /* Large text size */
+            font-weight: bold;
             text-decoration: none;
             cursor: pointer;
             transition: color 0.3s, transform 0.3s;
             white-space: nowrap;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
         }
 
         .menu-btn:hover {
             color: #ffffff;
-            transform: scale(1.1) translateX(-10px);
+            transform: scale(1.05) translateX(-10px);
         }
 
-        /* The 'Janky' Arc offsets */
-        #link1 { margin-right: 10%; }
-        #link2 { margin-right: 5%; }
-        #link3 { margin-right: 2%; }
-        #link4 { margin-right: 0%; }
+        /* Handwritten-style Arc Offsets */
+        #link1 { margin-right: 60px; }
+        #link2 { margin-right: 30px; }
+        #link3 { margin-right: 10px; }
+        #link4 { margin-right: 0px; }
 
     </style>
 </head>
@@ -113,19 +101,19 @@
     <script>
         const arm = document.getElementById('cat-arm');
         const buttons = document.querySelectorAll('.menu-btn');
-        const restAngle = -140;
+        const restAngle = -130;
 
         buttons.forEach(btn => {
             btn.addEventListener('mouseenter', () => {
                 const armRect = arm.getBoundingClientRect();
                 const btnRect = btn.getBoundingClientRect();
 
-                // Shoulder is top-center of the arm div
+                // Shoulder location
                 const shoulderX = armRect.left + (armRect.width / 2);
                 const shoulderY = armRect.top;
 
-                // Target is center of the button
-                const targetX = btnRect.left + (btnRect.width / 2);
+                // Button location (pointing to the left side of the text)
+                const targetX = btnRect.left;
                 const targetY = btnRect.top + (btnRect.height / 2);
 
                 const dx = targetX - shoulderX;
@@ -133,7 +121,7 @@
                 
                 let angle = Math.atan2(dy, dx) * (180 / Math.PI);
                 
-                // Offset by 90 because the arm image faces "down" (0 degrees)
+                // Adjusting by 90 because our 'arm' image is vertical
                 arm.style.transform = `rotate(${angle - 90}deg)`;
             });
 
