@@ -30,10 +30,8 @@
 <script>
 const img = document.getElementById("catgun");
 
-// start position
 let x = window.innerWidth * 0.2;
 let y = window.innerHeight * 0.4;
-
 let vx = 0;
 let vy = 0;
 
@@ -55,43 +53,52 @@ function animate(){
 
     const dx = centerX - mouseX;
     const dy = centerY - mouseY;
-    const distance = Math.sqrt(dx*dx + dy*dy);
+    const distance = Math.sqrt(dx*dx + dy*dy) || 1;
 
-    // direction away from cursor
     const dirX = dx / distance;
     const dirY = dy / distance;
 
-    // SPEED LOGIC
     let speed;
 
     if(distance < 80){
-        // cursor is on it -> slow movement
-        speed = 1.2;
+        speed = 1.2;     // barely moving when cursor is on it
     }
     else if(distance < 200){
-        // being chased -> fast acceleration
-        speed = 12;
+        speed = 14;      // strong acceleration when chased
     }
     else{
-        // idle drift
-        speed = 0.5;
+        speed = 0.6;
     }
 
     vx += dirX * speed;
     vy += dirY * speed;
 
-    // friction
-    vx *= 0.9;
-    vy *= 0.9;
+    // light friction so it keeps momentum
+    vx *= 0.95;
+    vy *= 0.95;
 
     x += vx;
     y += vy;
 
-    // bounce off walls
-    if(x < 0) x = 0;
-    if(y < 0) y = 0;
-    if(x > window.innerWidth - rect.width) x = window.innerWidth - rect.width;
-    if(y > window.innerHeight - rect.height) y = window.innerHeight - rect.height;
+    // --- STRONG WALL BOUNCE LOGIC ---
+    const bounceBoost = 1.25;
+
+    if(x <= 0){
+        x = 0;
+        vx = Math.abs(vx) * bounceBoost;
+    }
+    if(x >= window.innerWidth - rect.width){
+        x = window.innerWidth - rect.width;
+        vx = -Math.abs(vx) * bounceBoost;
+    }
+    if(y <= 0){
+        y = 0;
+        vy = Math.abs(vy) * bounceBoost;
+    }
+    if(y >= window.innerHeight - rect.height){
+        y = window.innerHeight - rect.height;
+        vy = -Math.abs(vy) * bounceBoost;
+    }
 
     img.style.left = x + "px";
     img.style.top = y + "px";
@@ -101,7 +108,6 @@ function animate(){
 
 animate();
 
-// click to go to next page
 img.addEventListener("click", ()=>{
     window.location.href = "page2.html";
 });
