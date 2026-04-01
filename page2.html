@@ -1,66 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>GO BACK</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CatGun Win</title>
 
 <style>
-    body {
-        margin: 0;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: black;
-        font-family: Impact, Arial Black, sans-serif;
-        color: white;
-        text-align: center;
+    body{
+        margin:0;
+        height:100vh;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        flex-direction:column;
+        background:radial-gradient(circle at center, #222, #000);
+        overflow:hidden;
+        font-family:Arial, Helvetica, sans-serif;
     }
 
-    .content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+    #catgun{
+        width:220px;
+        animation: dance 2.2s infinite ease-in-out;
     }
 
-    img {
-        width: 400px;
-        max-width: 80vw;
-        margin-bottom: 30px;
-        border: 5px solid white;
-        border-radius: 10px;
+    @keyframes dance {
+        0%   { transform: translateY(0) rotate(0deg) scale(1); }
+        15%  { transform: translateY(-40px) rotate(-15deg) scale(1.1); }
+        30%  { transform: translateY(0) rotate(15deg) scale(1); }
+        45%  { transform: translateY(-30px) rotate(-25deg) scale(1.1); }
+        60%  { transform: translateY(0) rotate(25deg) scale(1); }
+        75%  { transform: translateY(-20px) rotate(-10deg) scale(1.05); }
+        100% { transform: translateY(0) rotate(0deg) scale(1); }
     }
 
-    h1 {
-        font-size: 80px;
-        animation: flash 0.6s infinite alternate;
-        margin: 0 0 30px 0;
+    button{
+        margin-top:40px;
+        padding:12px 28px;
+        font-size:18px;
+        border:none;
+        border-radius:8px;
+        cursor:pointer;
+        background:#fff;
+        transition:transform 0.2s ease, background 0.2s ease;
     }
 
-    .back-btn {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        padding: 12px 24px;
-        font-size: 20px;
-        cursor: pointer;
-        border: 2px solid white;
-        background: black;
-        color: white;
+    button:hover{
+        transform:scale(1.1);
+        background:#ddd;
     }
 </style>
 </head>
 
 <body>
 
-<div class="content">
-    <img src="CatGun.png" alt="Cool image">
-    <h1>GO BACK</h1>
-</div>
+<img src="CatGun.png" id="catgun" alt="CatGun Dancing">
 
-<button class="back-btn" onclick="handleBackClick()">
-    Back
-</button>
+<button onclick="goBack()">Go Back</button>
+
+<script>
+function goBack(){
+    window.location.href = "Home.html";
+}
+</script>
 
 </body>
 </html>
