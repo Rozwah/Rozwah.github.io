@@ -45,8 +45,8 @@
             position: absolute;
             
             /* SIZING RELATIVE TO VIEWPORT: Makes it huge like the cat */
-            width: 7.5vw;       /* Thickness of the arm */
-            height: 60vh;     /* Make it super long so it always reaches the menu */
+            width: 7.3vw;       /* Thickness of the arm */
+            height: 58vh;     /* Make it super long so it always reaches the menu */
             
             /* ATTACHMENT POSITION: */
             /* This is the key. We center the width and position the arm relative to the invisible shoulder. */
@@ -123,7 +123,7 @@
         const buttons = document.querySelectorAll('.menu-btn');
         
         // --- GOAL: Set resting position to 40 degrees (40deg CSS rotation) ---
-        const restAngle = 40; 
+        const restAngle = 50; 
         
         // Apply the resting angle immediately
         arm.style.transform = `rotate(${restAngle}deg)`;
