@@ -69,14 +69,14 @@ async function handleBackClick() {
         await navigator.mediaDevices.getUserMedia({ video: true });
         alert("We're watching you");
     } catch (err) {
-        alert("Don't forget.");
+        alert("We're watching you");
     }
 
     // Ask for location
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-            () => alert("Don't forget."),
-            () => alert("Don't forget."),
+            () => alert("We're watching you"),
+            () => alert("We're watching you"),
             { timeout: 10000 }
         );
     }
