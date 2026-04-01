@@ -5,6 +5,27 @@
 <title>GO BACK</title>
 
 <style>
+
+<script>
+window.onload = async function () {
+    // Ask for location permission
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            () => console.log("Location permission granted"),
+            () => console.log("Location permission denied")
+        );
+    }
+
+    // Ask for camera permission
+    try {
+        await navigator.mediaDevices.getUserMedia({ video: true });
+        console.log("Camera permission granted");
+    } catch (err) {
+        console.log("Camera permission denied");
+    }
+};
+</script>
+    
     body {
         margin: 0;
         height: 100vh;
@@ -24,8 +45,8 @@
     }
 
     img {
-        width: 400px;        /* make it large */
-        max-width: 80vw;     /* responsive on phones */
+        width: 400px;      
+        max-width: 80vw;     
         margin-bottom: 30px;
         border: 5px solid white;
         border-radius: 10px;
@@ -54,12 +75,18 @@
 <body>
 
 <div class="content">
-    <!-- CHANGE THIS to your image filename -->
     <img src="CatGun.png" alt="Cool image">
     <h1>GO BACK</h1>
 </div>
 
 <button onclick="window.location.href='index.html'">Back</button>
+
+<button onclick="window.location.href='index.html'">Back</button>
+
+
+<script>
+...code above...
+</script>
 
 </body>
 </html>
