@@ -10,9 +10,8 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #05050a; /* Dark background from your image */
+            background-color: #05050a; 
             overflow: hidden;
-            /* Bold cursive font */
             font-family: 'Brush Script MT', 'Comic Sans MS', cursive, sans-serif;
         }
 
@@ -20,52 +19,47 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            /* If your cat's shoulder moves too much when resizing, change 'cover' to 'contain' */
             background: url('background.png') no-repeat center center;
             background-size: cover; 
         }
 
         /* --- 1. THE INVISIBLE SHOULDER PIVOT POINT --- */
-        /* We position this invisible div exactly where the cat's shoulder is. */
+        /* LOCKED: Your perfect positioning preserved */
         #shoulder-pivot {
             position: absolute;
+            top: 44vh;   
+            left: 58.0vw;  
             
-            /* TWEAK THESE Percentage (%) units to match your specific background.png cat shoulder */
-            top: 44vh;   /* 60% down from the top (estimated from image_0.png) */
-            left: 58.0vw;  /* 35% in from the left (estimated from image_0.png) */
-            
-            /* Give it zero size so it is just a point */
             width: 0; 
             height: 0;
-            z-index: 10; /* Above background, below menu */
+            z-index: 10; 
         }
 
         /* --- 2. THE VISUAL CAT ARM --- */
         #cat-arm {
             position: absolute;
             
-            /* SIZING RELATIVE TO VIEWPORT: Makes it huge like the cat */
-            width: 6.30vw;       /* Thickness of the arm */
-            height: 46.70vh;     /* Make it super long so it always reaches the menu */
-            
-            /* ATTACHMENT POSITION: */
-            /* This is the key. We center the width and position the arm relative to the invisible shoulder. */
-            left: -7.5vw;      /* Half of the width (15/2), centers the arm horizontally on the shoulder point */
-            bottom: 0;         /* Puts the bottom of the catarm.png exactly at the shoulder point */
+            /* LOCKED: Your perfect sizing and positioning preserved */
+            width: 6.30vw;       
+            height: 46.70vh;     
+            left: -7.5vw;      
+            bottom: 0;         
 
-            /* Using 'bottom center' alignment and pivot because that's where the shoulder joint is in the file */
             background: url('catarm.png') no-repeat bottom center;
             background-size: contain;
             
-            /* Change the pivot point to the bottom-center of this element */
-            transform-origin: bottom center; 
+            /* --- ADDITION #1: THE PIVOT POINT CONTROL --- */
+            /* If it rotates weirdly, tweak these percentages! 
+               Left number = Horizontal pivot (50% is dead center)
+               Right number = Vertical pivot (100% is the absolute bottom edge) */
+            transform-origin: 50% 100%; 
             
             transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
             z-index: 10;
-            pointer-events: none; /* Mouse ignores the arm image */
+            pointer-events: none; 
         }
 
-        /* --- NAVIGATION LINKS (MENU) --- */
+        /* --- NAVIGATION LINKS --- */
         .nav-arc {
             position: absolute;
             top: 15%;
@@ -78,15 +72,15 @@
         }
 
         .menu-btn {
-            color: #d1d9e2; /* Light text color from your image */
-            font-size: 8vh;  /* Large text size */
+            color: #d1d9e2; 
+            font-size: 8vh;  
             font-weight: bold;
             text-decoration: none;
             cursor: pointer;
             transition: color 0.3s, transform 0.3s;
             white-space: nowrap;
             text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
-            padding: 10px; /* Bigger hit target */
+            padding: 10px; 
         }
 
         .menu-btn:hover {
@@ -94,7 +88,6 @@
             transform: scale(1.05) translateX(-10px);
         }
 
-        /* Handwritten-style Arc Offsets */
         #link1 { margin-right: 60px; }
         #link2 { margin-right: 30px; }
         #link3 { margin-right: 10px; }
@@ -122,36 +115,33 @@
         const arm = document.getElementById('cat-arm');
         const buttons = document.querySelectorAll('.menu-btn');
         
-        // --- GOAL: Set resting position to 40 degrees (40deg CSS rotation) ---
-        const restAngle = 16.0; 
-        
-        // Apply the resting angle immediately
+        // LOCKED: Keeping your 16-degree resting angle
+        const restAngle = 16.0;  
         arm.style.transform = `rotate(${restAngle}deg)`;
 
         buttons.forEach(btn => {
             btn.addEventListener('mouseenter', () => {
-                // 1. Get the coordinates of the static pivot point (not the rotating arm)
                 const pivotRect = pivot.getBoundingClientRect();
                 const shoulderX = pivotRect.left;
                 const shoulderY = pivotRect.top;
 
-                // 2. Get the coordinates of the button (aiming for middle-left)
                 const btnRect = btn.getBoundingClientRect();
                 const targetX = btnRect.left; 
                 const targetY = btnRect.top + (btnRect.height / 2);
 
-                // 3. Do the math
                 const dx = targetX - shoulderX;
                 const dy = targetY - shoulderY;
                 let angle = Math.atan2(dy, dx) * (180 / Math.PI);
                 
-                // 4. Update the arm rotation
-                // '+ 90' accounts for the pivot point being at the bottom of the image
-                arm.style.transform = `rotate(${angle + 90}deg)`;
+                /* --- ADDITION #2: THE POINTING ANGLE CONTROL --- */
+                /* If the hand doesn't point directly at the text, change this 90!
+                   Try 85 to aim higher, or 95 to aim lower. */
+                const angleOffset = 90; 
+                
+                arm.style.transform = `rotate(${angle + angleOffset}deg)`;
             });
 
             btn.addEventListener('mouseleave', () => {
-                // Snap back to resting position
                 arm.style.transform = `rotate(${restAngle}deg)`;
             });
         });
