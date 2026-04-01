@@ -52,7 +52,7 @@
             /* If it rotates weirdly, tweak these percentages! 
                Left number = Horizontal pivot (50% is dead center)
                Right number = Vertical pivot (100% is the absolute bottom edge) */
-            transform-origin: 50% 100%; 
+            transform-origin: 50% 90%; 
             
             transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
             z-index: 10;
@@ -136,7 +136,7 @@
                 /* --- ADDITION #2: THE POINTING ANGLE CONTROL --- */
                 /* If the hand doesn't point directly at the text, change this 90!
                    Try 85 to aim higher, or 95 to aim lower. */
-                const angleOffset = 90; 
+                const angleOffset = 85; 
                 
                 arm.style.transform = `rotate(${angle + angleOffset}deg)`;
             });
