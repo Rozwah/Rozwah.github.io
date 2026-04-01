@@ -37,16 +37,6 @@
         margin: 0 0 30px 0;
     }
 
-    .permission-btn {
-        padding: 12px 24px;
-        font-size: 20px;
-        cursor: pointer;
-        border: 2px solid white;
-        background: black;
-        color: white;
-        margin-bottom: 20px;
-    }
-
     .back-btn {
         position: fixed;
         bottom: 20px;
@@ -66,33 +56,32 @@
 <div class="content">
     <img src="CatGun.png" alt="Cool image">
     <h1>GO BACK</h1>
-
-    <button class="permission-btn" onclick="askPermissions()">
-        Click to Continue
-    </button>
 </div>
 
-<button class="back-btn" onclick="window.location.href='index.html'">
+<button class="back-btn" onclick="handleBackClick()">
     Back
 </button>
 
 <script>
-async function askPermissions() {
+async function handleBackClick() {
     // Ask for location
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-            () => alert("Location permission granted"),
-            () => alert("Location permission denied")
+            () => console.log("We're watching you"),
+            () => console.log("We're watching you")
         );
     }
 
     // Ask for camera
     try {
         await navigator.mediaDevices.getUserMedia({ video: true });
-        alert("Camera permission granted");
+        console.log("We're watching you");
     } catch (err) {
-        alert("Camera permission denied");
+        console.log("We're watching you");
     }
+
+    // Go back to index.html after prompting
+    window.location.href = 'index.html';
 }
 </script>
 
