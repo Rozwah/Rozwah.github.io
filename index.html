@@ -2,92 +2,192 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>This Is Safe I Promise</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio</title>
 
 <style>
-    body {
-        margin: 0;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: black;
-        font-family: Impact, Arial Black, sans-serif;
-        overflow: hidden;
-        color: white;
+    body{
+        margin:0;
+        font-family: Arial, Helvetica, sans-serif;
+        color:#111;
     }
 
-    .container {
-        text-align: center;
+    /* NAVBAR */
+    .navbar{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:25px 60px;
     }
 
-    h1 {
-        font-size: 120px;
-        margin-bottom: 40px;
-        text-transform: uppercase;
-        letter-spacing: 10px;
-        animation: crazy 0.8s infinite alternate;
-        text-shadow: 
-            0 0 10px red,
-            0 0 20px yellow,
-            0 0 30px lime,
-            0 0 40px cyan,
-            0 0 50px magenta;
+    .logo{
+        font-weight:700;
+        font-size:22px;
     }
 
-    label {
-        font-size: 24px;
-        margin-right: 10px;
+    .nav-links a{
+        margin-left:30px;
+        text-decoration:none;
+        color:#111;
+        font-size:16px;
     }
 
-    input {
-        padding: 10px;
-        font-size: 20px;
-        border: 3px solid white;
-        border-radius: 5px;
-        background: black;
-        color: white;
+    /* MAIN SECTION */
+    .main{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:80px 60px;
+        gap:80px;
     }
 
-    button {
-        padding: 10px 20px;
-        font-size: 18px;
-        margin-left: 10px;
-        cursor: pointer;
-        border: 2px solid white;
-        background: black;
-        color: white;
+    .profile-pic{
+        width:420px;
+        height:420px;
+        border-radius:50%;
+        object-fit:cover;
     }
 
-    .corner-button {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
+    .intro{
+        max-width:550px;
+    }
+
+    .intro h1{
+        font-size:90px;
+        margin:0 0 20px 0;
+        font-weight:800;
+    }
+
+    .intro h3{
+        margin:0;
+        font-size:20px;
+        font-weight:700;
+    }
+
+    .intro p{
+        margin-top:10px;
+        line-height:1.6;
+        color:#333;
+    }
+
+    /* BUTTON CIRCLES */
+    .circles{
+        margin-top:40px;
+        display:flex;
+        gap:25px;
+    }
+
+    .circle{
+        width:140px;
+        height:140px;
+        border-radius:50%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:700;
+        text-decoration:none;
+        color:#111;
+        font-size:18px;
+    }
+
+    .resume{ background:#f4b400; }
+    .projects{ background:#ff3b30; }
+    .contact{ background:#79d5e2; }
+
+    /* FOOTER */
+    .footer{
+        border-top:1px solid #ccc;
+        margin-top:80px;
+        padding:30px 60px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        font-size:14px;
+    }
+
+    .footer-section{
+        line-height:1.6;
+    }
+
+    .social a{
+        margin-right:10px;
+        text-decoration:none;
+        color:#111;
+        font-weight:bold;
+    }
+
+    @media(max-width:1000px){
+        .main{
+            flex-direction:column;
+            text-align:center;
+        }
+
+        .intro h1{
+            font-size:60px;
+        }
+
+        .circles{
+            justify-content:center;
+        }
     }
 </style>
 </head>
-
 <body>
-    <div class="container">
-        <h1>This is a safe website</h1>
-        <div>
-            <label for="nameInput">SSN:</label>
-            <input type="text" id="nameInput" placeholder="Enter your Social Security Numbers">
-            <button onclick="submitName()">Enter</button>
+
+<!-- NAVIGATION -->
+<div class="navbar">
+    <div class="logo">Nicol Rider</div>
+    <div class="nav-links">
+        <a href="#">Resume</a>
+        <a href="#">Projects</a>
+        <a href="#">Contact</a>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+    <img src="CatGun" alt="Profile Image" class="profile-pic">
+
+    <div class="intro">
+        <h1>Hello</h1>
+        <h3>A Bit About Me:</h3>
+        <p>
+            I'm a paragraph. Click here to add your own text and edit me. 
+            I’m a great place for you to tell a story and let your users 
+            know a little more about you.
+        </p>
+
+        <div class="circles">
+            <a href="#" class="circle resume">Resume</a>
+            <a href="#" class="circle projects">Projects</a>
+            <a href="#" class="circle contact">Contact</a>
         </div>
     </div>
+</div>
 
-    <button class="corner-button" onclick="goToPage()">Next Page</button>
+<!-- FOOTER -->
+<div class="footer">
+    <div class="footer-section">
+        <strong>Phone</strong><br>
+        123-456-7890
+    </div>
 
-<script>
-    function submitName() {
-        const name = document.getElementById('nameInput').value;
-        alert("hewo pwincess ");
-    }
+    <div class="footer-section">
+        <strong>Email</strong><br>
+        info@mysite.com
+    </div>
 
-    function goToPage() {
-        window.location.href = "page2.html";
-    }
-</script>
+    <div class="footer-section social">
+        <strong>Follow Me</strong><br>
+        <a href="#">in</a>
+        <a href="#">t</a>
+    </div>
+
+    <div class="footer-section">
+        © 2023 By Nicol Rider<br>
+        Proudly created with Wix.com
+    </div>
+</div>
+
 </body>
 </html>
