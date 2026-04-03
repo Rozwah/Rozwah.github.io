@@ -6,7 +6,7 @@
     <title>The Archive</title>
     <style>
         :root {
-            /* These match your original 16:9 positioning ratios */
+            /* Positioning ratios for the shoulder on the background art */
             --shoulder-top: 42%;
             --shoulder-left: 58%;
         }
@@ -22,7 +22,6 @@
         }
 
         /* --- LAYER 1: THE BACKGROUND & ARM --- */
-        /* This container perfectly mimics 'background-size: cover' */
         #background-layer {
             position: absolute;
             top: 50%;
@@ -46,9 +45,9 @@
 
         #cat-arm {
             position: absolute;
-            /* Scaled relative to the background height to maintain proportions */
             width: 11vh;   
             height: 80vh; 
+            /* UPDATED OFFSET */
             left: -12.5vh;   
             bottom: 0; 
             background: url('catarm.png') no-repeat bottom center;
@@ -59,14 +58,14 @@
         }
 
         /* --- LAYER 2: THE UI (BUTTONS) --- */
-        /* These stay on the screen regardless of background cropping */
         .nav-arc {
             position: fixed;
-            top: 10%;
+            /* MOVED DOWN SLIGHTLY (was 10%) */
+            top: 18%;
             right: 5%;
             display: flex;
             flex-direction: column;
-            gap: 2vh;
+            gap: 2.5vh;
             align-items: flex-end;
             z-index: 10;
             width: auto;
@@ -74,7 +73,6 @@
 
         .menu-btn {
             color: #d1d9e2; 
-            /* clamp makes font size responsive: min 2rem, scales with screen, max 8vh */
             font-size: clamp(2rem, 8vh, 5rem); 
             font-weight: bold;
             text-decoration: none;
@@ -90,7 +88,7 @@
             transform: scale(1.1) translateX(-10px);
         }
 
-        /* Adjusting the arc offsets to use vmin so they scale on mobile/desktop */
+        /* Arc offsets using vmin to scale with screen size */
         #link1 { margin-right: 6vmin; }
         #link2 { margin-right: 4vmin; }
         #link3 { margin-right: 2vmin; }
@@ -98,8 +96,12 @@
 
         /* Mobile specific adjustments */
         @media (max-aspect-ratio: 1/1) {
-            .nav-arc { top: 5%; right: 2%; }
-            .menu-btn { font-size: 12vw; } /* Bigger text for thumbs on phones */
+            .nav-arc { 
+                /* MOVED DOWN SLIGHTLY FOR MOBILE (was 5%) */
+                top: 12%; 
+                right: 3%; 
+            }
+            .menu-btn { font-size: 11vw; } 
         }
     </style>
 </head>
