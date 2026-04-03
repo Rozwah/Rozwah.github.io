@@ -8,8 +8,6 @@
         :root {
             --shoulder-top: 42%;
             --shoulder-left: 58%;
-            /* Tweak this if the arm is naturally tilted in your PNG */
-            --arm-file-correction: 75deg; 
         }
 
         body, html {
@@ -22,13 +20,14 @@
             font-family: 'Brush Script MT', 'Comic Sans MS', cursive, sans-serif;
         }
 
+        /* --- LAYER 1: THE BACKGROUND & ARM --- */
         #background-layer {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 100vw;
-            height: 56.25vw; 
+            height: 56.25vw; /* 16:9 ratio */
             min-height: 100vh;
             min-width: 177.78vh; 
             background: url('background.png') no-repeat center center;
@@ -47,41 +46,41 @@
             position: absolute;
             width: 11vh;   
             height: 80vh; 
-            left: -12.5vh; /* Your requested offset */
+            left: -12.5vh;   
             bottom: 0; 
             background: url('catarm.png') no-repeat bottom center;
             background-size: contain;
             
-            /* CHANGED: Rotating from the horizontal center (50%) 
-               makes the math consistent across all ratios */
-            transform-origin: 50% 100%; 
+            /* REVERTED: Kept exactly as it was when it looked good */
+            transform-origin: 25% 100%; 
             
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
             pointer-events: none; 
-            z-index: 10;
         }
 
+        /* --- LAYER 2: THE UI (BUTTONS) --- */
         .nav-arc {
             position: fixed;
             top: 18%;
             right: 5%;
             display: flex;
             flex-direction: column;
-            gap: 3vh;
+            gap: 2.5vh;
             align-items: flex-end;
-            z-index: 20;
+            z-index: 10;
+            width: auto;
         }
 
         .menu-btn {
             color: #d1d9e2; 
-            font-size: clamp(1.8rem, 7vh, 4.5rem); 
+            font-size: clamp(2rem, 8vh, 5rem); 
             font-weight: bold;
             text-decoration: none;
             cursor: pointer;
             transition: color 0.3s, transform 0.3s;
             white-space: nowrap;
             text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
-            padding: 10px 20px;
+            padding: 5px 10px;
         }
 
         .menu-btn:hover {
@@ -95,8 +94,8 @@
         #link4 { margin-right: 0; }
 
         @media (max-aspect-ratio: 1/1) {
-            .nav-arc { top: 15%; right: 4%; }
-            .menu-btn { font-size: 10vw; } 
+            .nav-arc { top: 12%; right: 3%; }
+            .menu-btn { font-size: 11vw; } 
         }
     </style>
 </head>
@@ -121,36 +120,32 @@
         const buttons = document.querySelectorAll('.menu-btn');
         
         const restAngle = 16.0;  
-        const correction = 75; // The constant angle correction for your PNG
-
-        // Set initial rest state
         arm.style.transform = `rotate(${restAngle}deg)`;
 
         buttons.forEach(btn => {
             btn.addEventListener('mouseenter', () => {
-                // 1. Get the current absolute position of the shoulder pivot
-                const pRect = pivot.getBoundingClientRect();
-                const pX = pRect.left;
-                const pY = pRect.top;
-
-                // 2. Get the target point (the left edge center of the button)
-                const bRect = btn.getBoundingClientRect();
-                const bX = bRect.left; 
-                const bY = bRect.top + (bRect.height / 2);
-
-                // 3. DERIVED EQUATION
-                // We calculate the angle of the vector from Pivot to Button
-                // Angle (radians) = atan2(Δy, Δx)
-                const dx = bX - pX;
-                const dy = bY - pY;
-                const angleRad = Math.atan2(dy, dx);
+                const pivotRect = pivot.getBoundingClientRect();
+                const vh = window.innerHeight / 100;
                 
-                // Convert to degrees
-                const angleDeg = angleRad * (180 / Math.PI);
+                // --- THE TRUE PIVOT LINE EQUATION ---
+                // We calculate exactly where the 25% rotation point sits in pixel space
+                // by mapping your CSS (-12.5vh shift, 11vh width, 25% origin) into math.
+                // This stops the "parallax" pointing error without changing CSS.
+                const visualPivotX = pivotRect.left - (12.5 * vh) + (11 * vh * 0.25);
+                const visualPivotY = pivotRect.top; 
+
+                const btnRect = btn.getBoundingClientRect();
+                const targetX = btnRect.left; 
+                const targetY = btnRect.top + (btnRect.height / 2);
+
+                const dx = targetX - visualPivotX;
+                const dy = targetY - visualPivotY;
+                let angle = Math.atan2(dy, dx) * (180 / Math.PI);
                 
-                // Final Rotation = Calculated Angle + PNG Correction
-                // This ensures the "line" of the arm always intersects the button
-                arm.style.transform = `rotate(${angleDeg + correction}deg)`;
+                // Because we calculated the true anchor, this constant applies perfectly everywhere
+                const angleOffset = 78; 
+                
+                arm.style.transform = `rotate(${angle + angleOffset}deg)`;
             });
 
             btn.addEventListener('mouseleave', () => {
