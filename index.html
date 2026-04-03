@@ -93,6 +93,19 @@
         #link3 { margin-right: 2vmin; }
         #link4 { margin-right: 0; }
 
+        /* --- ADDED CREDITS STYLE --- */
+        .credits {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            color: rgba(209, 217, 226, 0.5); /* Semi-transparent for a subtle look */
+            letter-spacing: 1px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
         @media (max-aspect-ratio: 1/1) {
             .nav-arc { top: 12%; right: 3%; }
             .menu-btn { font-size: 11vw; } 
@@ -114,6 +127,8 @@
         <a href="page5.html" class="menu-btn" id="link4">etc</a>
     </nav>
 
+    <div class="credits">łan rad rołcz</div>
+
     <script>
         const pivot = document.getElementById('shoulder-pivot');
         const arm = document.getElementById('cat-arm');
@@ -127,10 +142,6 @@
                 const pivotRect = pivot.getBoundingClientRect();
                 const vh = window.innerHeight / 100;
                 
-                // --- THE TRUE PIVOT LINE EQUATION ---
-                // We calculate exactly where the 25% rotation point sits in pixel space
-                // by mapping your CSS (-12.5vh shift, 11vh width, 25% origin) into math.
-                // This stops the "parallax" pointing error without changing CSS.
                 const visualPivotX = pivotRect.left - (12.5 * vh) + (11 * vh * 0.25);
                 const visualPivotY = pivotRect.top; 
 
@@ -142,7 +153,6 @@
                 const dy = targetY - visualPivotY;
                 let angle = Math.atan2(dy, dx) * (180 / Math.PI);
                 
-                // Because we calculated the true anchor, this constant applies perfectly everywhere
                 const angleOffset = 78; 
                 
                 arm.style.transform = `rotate(${angle + angleOffset}deg)`;
