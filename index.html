@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Archive</title>
     <style>
+        /* 1. SETUP CENTERING */
         body, html {
             margin: 0;
             padding: 0;
@@ -12,75 +13,72 @@
             height: 100%;
             background-color: #05050a; 
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'Brush Script MT', 'Comic Sans MS', cursive, sans-serif;
         }
 
+        /* 2. THE ASPECT RATIO BOX 
+           This box stays 16:9 and scales to fit the screen without cropping. */
         #scene-container {
             position: relative;
+            aspect-ratio: 16 / 9;
             width: 100vw;
-            height: 100vh;
+            max-height: 100vh;
+            max-width: 177.78vh; /* 16/9 of the height */
             background: url('background.png') no-repeat center center;
-            background-size: cover; 
+            background-size: contain; 
         }
 
-        /* --- 1. THE INVISIBLE SHOULDER PIVOT POINT --- */
-        /* LOCKED: Your perfect positioning preserved */
+        /* 3. CONVERT UNITS TO PERCENTAGES 
+           Everything inside now uses % of the #scene-container, NOT the screen. */
         #shoulder-pivot {
             position: absolute;
-            top: 42vh;   
-            left: 58.0vw;  
-            
+            top: 42%;    /* Changed from vh */
+            left: 58%;   /* Changed from vw */
             width: 0; 
             height: 0;
             z-index: 10; 
         }
 
-        /* --- 2. THE VISUAL CAT ARM --- */
         #cat-arm {
             position: absolute;
-            
-            /* LOCKED: Your perfect sizing and positioning preserved */
-            width: 6.30vw;       
-            height: 80.70vh;     
-            left: -6.8vw;      
-            bottom: 0;         
+            width: 6.3%;   /* Changed from vw */
+            height: 80.7%; /* Changed from vh */
+            left: -6.8%;   /* Changed from vw */
+            bottom: 0;          
 
             background: url('catarm.png') no-repeat bottom center;
             background-size: contain;
-            
-            /* --- ADDITION #1: THE PIVOT POINT CONTROL --- */
-            /* If it rotates weirdly, tweak these percentages! 
-               Left number = Horizontal pivot (50% is dead center)
-               Right number = Vertical pivot (100% is the absolute bottom edge) */
             transform-origin: 25% 100%; 
-            
             transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
             z-index: 10;
             pointer-events: none; 
         }
 
-        /* --- NAVIGATION LINKS --- */
         .nav-arc {
             position: absolute;
             top: 15%;
             right: 8%;
             display: flex;
             flex-direction: column;
-            gap: 4vh;
+            gap: 4%; /* Percent of container height */
             align-items: flex-end;
             z-index: 20;
         }
 
         .menu-btn {
             color: #d1d9e2; 
-            font-size: 8vh;  
+            /* Using 'cqw' or 'vh' here is okay, but 8% of container height is safer */
+            font-size: 5vw;  
             font-weight: bold;
             text-decoration: none;
             cursor: pointer;
             transition: color 0.3s, transform 0.3s;
             white-space: nowrap;
             text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
-            padding: 10px; 
+            padding: 0.5% 1%; 
         }
 
         .menu-btn:hover {
@@ -88,9 +86,10 @@
             transform: scale(1.05) translateX(-10px);
         }
 
-        #link1 { margin-right: 60px; }
-        #link2 { margin-right: 30px; }
-        #link3 { margin-right: 10px; }
+        /* Horizontal offsets using percentages to maintain the "arc" */
+        #link1 { margin-right: 4vw; }
+        #link2 { margin-right: 2vw; }
+        #link3 { margin-right: 0.5vw; }
         #link4 { margin-right: 0px; }
 
     </style>
@@ -115,7 +114,6 @@
         const arm = document.getElementById('cat-arm');
         const buttons = document.querySelectorAll('.menu-btn');
         
-        // LOCKED: Keeping your 16-degree resting angle
         const restAngle = 16.0;  
         arm.style.transform = `rotate(${restAngle}deg)`;
 
@@ -133,11 +131,7 @@
                 const dy = targetY - shoulderY;
                 let angle = Math.atan2(dy, dx) * (180 / Math.PI);
                 
-                /* --- ADDITION #2: THE POINTING ANGLE CONTROL --- */
-                /* If the hand doesn't point directly at the text, change this 90!
-                   Try 85 to aim higher, or 95 to aim lower. */
                 const angleOffset = 72.5; 
-                
                 arm.style.transform = `rotate(${angle + angleOffset}deg)`;
             });
 
