@@ -133,11 +133,18 @@
         const arm = document.getElementById('cat-arm');
         const buttons = document.querySelectorAll('.menu-btn');
         
+        // --- ADDED: Initialize the audio object ---
+        const hoverSound = new Audio('sound.mp3');
+        
         const restAngle = 16.0;  
         arm.style.transform = `rotate(${restAngle}deg)`;
 
         buttons.forEach(btn => {
             btn.addEventListener('mouseenter', () => {
+                // --- ADDED: Play sound on hover ---
+                hoverSound.currentTime = 0; // Rewind to start for rapid hovering
+                hoverSound.play().catch(e => console.log("Audio play prevented by browser:", e));
+
                 const pivotRect = pivot.getBoundingClientRect();
                 const vh = window.innerHeight / 100;
                 
