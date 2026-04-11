@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PERSONA 3 // SOCIAL LINKS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --blue:   #00c8ff;
+    --teal:   #00ffd0;
+    --dark:   #04090f;
+    --panel:  #060e1c;
+    --row-bg: rgba(0,30,60,0.55);
+    --row-sel:#0a2a4a;
+    --border: #0d2d4d;
+    --dim:    #3a6a8a;
+    --white:  #cce8f8;
+    --red:    #ff2255;
+    --gold:   #ffd055;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--dark);
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--white);
+    overflow: hidden;
+  }
+
+  /* ── CRT scanlines ── */
+  body::before {
+    content:''; position:fixed; inset:0; z-index:9999; pointer-events:none;
+    background: repeating-linear-gradient(0deg,
+      transparent, transparent 3px,
+      rgba(0,0,0,0.13) 3px, rgba(0,0,0,0.13) 4px);
+  }
+
+  /* ── Animated BG ── */
+  .bg {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 50%, #001a35 0%, transparent 70%),
+      radial-gradient(ellipse 40% 80% at 10% 50%, #001225 0%, transparent 60%),
+      var(--dark);
+    overflow: hidden;
+  }
+
+  .bg-lines {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.035) 1px, transparent 1px);
+    background-size: 36px 36px;
+    animation: gridScroll 18s linear infinite;
+  }
+
+  @keyframes gridScroll {
+    from { background-position: 0 0; }
+    to   { background-position: 36px 36px; }
+  }
+
+  /* diagonal blue light sweep */
+  .bg-sweep {
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg,
+      transparent 30%, rgba(0,150,255,0.06) 50%, transparent 70%);
+    background-size: 300% 300%;
+    animation: sweep 6s ease-in-out infinite alternate;
+  }
+
+  @keyframes sweep {
+    from { background-position: 0% 0%; }
+    to   { background-position: 100% 100%; }
+  }
+
+  /* ══════════════════════════════
+     LAYOUT
+  ══════════════════════════════ */
+  .shell {
+    position: relative; z-index: 1;
+    width: 100%; height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 36px;
+    gap: 16px;
+  }
+
+  /* ── Top label bar ── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .top-bar .screen-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.2em;
+    color: var(--blue);
+    text-shadow: 0 0 14px rgba(0,200,255,0.6);
+  }
+
+  .top-bar .screen-title span { color: var(--white); }
+
+  .top-bar .mono {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--dim);
+    letter-spacing: 0.18em;
+    margin-left: auto;
+  }
+
+  /* ── Main content row ── */
+  .content {
+    flex: 1;
+    display: flex;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  /* ══════════════════════════════
+     LEFT: LIST PANEL
+  ══════════════════════════════ */
+  .list-panel {
+    width: 340px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    animation: slideInLeft 0.5s ease both;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .list-panel::-webkit-scrollbar { width: 3px; }
+  .list-panel::-webkit-scrollbar-track { background: transparent; }
+  .list-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  @keyframes slideInLeft {
+    from { opacity:0; transform: translateX(-30px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+
+  .list-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 18px;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid rgba(10,30,55,0.6);
+    cursor: pointer;
+    position: relative;
+    background: var(--row-bg);
+    transition: background 0.18s, border-color 0.18s;
+    user-select: none;
+    /* stagger */
+    opacity: 0;
+    animation: rowIn 0.35s ease both;
+  }
+
+  .list-item:nth-child(1) { animation-delay: 0.05s; }
+  .list-item:nth-child(2) { animation-delay: 0.10s; }
+  .list-item:nth-child(3) { animation-delay: 0.15s; }
+  .list-item:nth-child(4) { animation-delay: 0.20s; }
+  .list-item:nth-child(5) { animation-delay: 0.25s; }
+  .list-item:nth-child(6) { animation-delay: 0.30s; }
+  .list-item:nth-child(7) { animation-delay: 0.35s; }
+
+  @keyframes rowIn {
+    from { opacity:0; transform: translateX(-16px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+
+  .list-item:hover {
+    background: rgba(0,50,90,0.6);
+    border-left-color: var(--dim);
+  }
+
+  .list-item.active {
+    background: var(--row-sel);
+    border-left-color: var(--blue);
+  }
+
+  .list-item.active .item-name { color: var(--blue); }
+
+  /* arcana icon circle */
+  .arcana-icon {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    background: #040c1a;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+
+  .list-item.active .arcana-icon,
+  .list-item:hover .arcana-icon {
+    border-color: var(--blue);
+    box-shadow: 0 0 10px rgba(0,200,255,0.4);
+  }
+
+  .item-info { flex: 1; min-width: 0; }
+
+  .item-arcana {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .item-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.15rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    transition: color 0.18s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .item-sub {
+    font-size: 0.75rem;
+    color: var(--dim);
+    margin-top: 1px;
+  }
+
+  /* RANK display */
+  .rank-block {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .rank-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  .rank-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--gold);
+    text-shadow: 0 0 12px rgba(255,208,85,0.5);
+  }
+
+  .rank-val.maxed {
+    color: var(--teal);
+    text-shadow: 0 0 14px rgba(0,255,208,0.6);
+  }
+
+  /* Arrow indicator */
+  .list-item::after {
+    content: '▶';
+    font-size: 0.5rem;
+    color: var(--blue);
+    opacity: 0;
+    margin-left: 4px;
+    transition: opacity 0.18s;
+  }
+
+  .list-item.active::after { opacity: 1; }
+
+  /* ══════════════════════════════
+     DIVIDER
+  ══════════════════════════════ */
+  .divider {
+    width: 2px;
+    background: linear-gradient(180deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    margin: 0 28px;
+    flex-shrink: 0;
+  }
+
+  /* ══════════════════════════════
+     RIGHT: CARD FLIP PANEL
+  ══════════════════════════════ */
+  .card-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1000px;
+    animation: fadeUp 0.5s ease 0.3s both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(20px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* The flip container */
+  .card-flipper {
+    width: 420px;
+    max-width: 100%;
+    height: 480px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+  }
+
+  .card-flipper.flipping {
+    animation: cardFlip 0.55s cubic-bezier(0.4, 0.2, 0.2, 1) both;
+  }
+
+  @keyframes cardFlip {
+    0%   { transform: rotateY(0deg); }
+    50%  { transform: rotateY(90deg); }
+    100% { transform: rotateY(0deg); }
+  }
+
+  .card-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Card body ── */
+  .info-card {
+    width: 100%; height: 100%;
+    background: linear-gradient(155deg, #060f20 0%, #04090f 100%);
+    border: 1px solid var(--blue);
+    clip-path: polygon(0 0, calc(100% - 36px) 0, 100% 36px, 100% 100%, 36px 100%, 0 calc(100% - 36px));
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 36px 36px 32px;
+  }
+
+  /* corner cuts glow */
+  .info-card::before,
+  .info-card::after {
+    content: '';
+    position: absolute;
+  }
+
+  .info-card::before {
+    top: 0; right: 0;
+    width: 36px; height: 36px;
+    background: var(--blue);
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+    opacity: 0.55;
+  }
+
+  .info-card::after {
+    bottom: 0; left: 0;
+    width: 36px; height: 36px;
+    background: var(--blue);
+    clip-path: polygon(0 100%, 0 0, 100% 100%);
+    opacity: 0.3;
+  }
+
+  /* inner shimmer */
+  .card-shimmer {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(105deg, transparent 35%, rgba(0,200,255,0.05) 50%, transparent 65%);
+    background-size: 300% 100%;
+    animation: shimmer 4s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Left glow bar */
+  .card-bar {
+    position: absolute;
+    left: 0; top: 40px; bottom: 40px;
+    width: 3px;
+    background: linear-gradient(180deg, var(--teal), var(--blue), transparent);
+    box-shadow: 0 0 14px var(--blue);
+  }
+
+  /* Card header */
+  .card-arcana-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.6rem;
+    letter-spacing: 0.06em;
+    color: var(--white);
+    text-shadow: 0 0 20px rgba(0,200,255,0.25);
+    line-height: 1.05;
+    margin-bottom: 4px;
+  }
+
+  .card-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    margin-bottom: 22px;
+  }
+
+  /* big emoji symbol */
+  .card-symbol {
+    font-size: 4rem;
+    margin-bottom: 18px;
+    filter: drop-shadow(0 0 16px rgba(0,200,255,0.5));
+    line-height: 1;
+    animation: floatSymbol 3s ease-in-out infinite;
+  }
+
+  @keyframes floatSymbol {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  /* Rank pips */
+  .card-rank-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .rank-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+
+  .pip {
+    width: 22px; height: 6px;
+    background: var(--border);
+    border-radius: 1px;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  .pip.filled {
+    background: var(--gold);
+    box-shadow: 0 0 8px rgba(255,208,85,0.5);
+  }
+
+  .pip.maxed {
+    background: var(--teal);
+    box-shadow: 0 0 8px rgba(0,255,208,0.6);
+  }
+
+  /* description */
+  .card-desc {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #7aadcc;
+    flex: 1;
+  }
+
+  /* stat rows at bottom */
+  .card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 20px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .stat-pair { display: flex; flex-direction: column; }
+
+  .stat-pair .s-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  .stat-pair .s-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
+    color: var(--blue);
+  }
+
+  /* card corner id */
+  .card-id {
+    position: absolute;
+    bottom: 14px; right: 22px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    color: #0d2a40;
+    letter-spacing: 0.12em;
+  }
+
+  /* ══════════════════════════════
+     BOTTOM NAV HINT
+  ══════════════════════════════ */
+  .nav-hint {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--dim);
+    letter-spacing: 0.14em;
+    animation: fadeUp 0.4s ease 0.5s both;
+  }
+
+  .nav-hint .key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px; height: 20px;
+    border: 1px solid var(--dim);
+    border-radius: 3px;
+    margin-right: 6px;
+    font-size: 0.7rem;
+    color: var(--white);
+  }
+
+  .nav-hint span { color: var(--blue); margin-right: 4px; }
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="bg-lines"></div>
+  <div class="bg-sweep"></div>
+</div>
+
+<div class="shell">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="screen-title">SOCIAL <span>LINKS</span></div>
+    <div class="mono">GEKKOUKAN HIGH // RECORD 2009-09</div>
+  </div>
+
+  <!-- Main content -->
+  <div class="content">
+
+    <!-- LEFT LIST -->
+    <div class="list-panel" id="listPanel">
+      <!-- items injected by JS -->
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- RIGHT CARD -->
+    <div class="card-panel">
+      <div class="card-flipper" id="cardFlipper">
+        <div class="card-face">
+          <div class="info-card">
+            <div class="card-shimmer"></div>
+            <div class="card-bar"></div>
+            <div class="card-arcana-tag" id="cArcana">// ARCANA</div>
+            <div class="card-title" id="cTitle">SELECT A LINK</div>
+            <div class="card-sub" id="cSub">——</div>
+            <div class="card-symbol" id="cSymbol">🃏</div>
+            <div class="card-rank-row" id="cRankRow">
+              <span class="rank-text">RANK</span>
+            </div>
+            <div class="card-desc" id="cDesc">Choose a Social Link from the list to view details.</div>
+            <div class="card-stats" id="cStats"></div>
+            <div class="card-id" id="cId">REF // ---</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom nav hint -->
+  <div class="nav-hint">
+    <div><span class="key">↑</span><span>↓</span> Navigate</div>
+    <div><span class="key">↵</span> Select</div>
+    <div><span class="key">ESC</span> Back</div>
+  </div>
+
+</div>
+
+<script>
+const LINKS = [
+  {
+    arcana: "THE FOOL",
+    name: "SEES",
+    sub: "Specialized Extracurricular Exec. Squad",
+    symbol: "🌙",
+    rank: 1,
+    maxRank: 10,
+    icon: "🔵",
+    color: "#00c8ff",
+    desc: "The elite team assembled to explore Tartarus and combat Shadows. Bound together by fate and the Wild Card, their bonds strengthen with each night in the Dark Hour.",
+    stats: [
+      { label: "Members",   val: "7" },
+      { label: "Authority", val: "A-RANK" },
+      { label: "Location",  val: "DORM / TARTARUS" },
+      { label: "Status",    val: "ACTIVE" }
+    ],
+    ref: "0001-FOOL"
+  },
+  {
+    arcana: "THE CHARIOT",
+    name: "CLASSMATE",
+    sub: "Kazushi Miyamoto",
+    symbol: "⚡",
+    rank: 3,
+    maxRank: 10,
+    icon: "🏃",
+    color: "#ff9020",
+    desc: "A determined track athlete with an injured knee. Behind his bravado lies a deep vulnerability and a desire to prove himself worthy of the team that believes in him.",
+    stats: [
+      { label: "Activity",  val: "TRACK" },
+      { label: "Grade",     val: "2ND YR" },
+      { label: "Location",  val: "CLASSROOM" },
+      { label: "Affinity",  val: "HIGH" }
+    ],
+    ref: "0003-CHAR"
+  },
+  {
+    arcana: "THE EMPEROR",
+    name: "STUDENT LIFE",
+    sub: "Hidetoshi Odagiri",
+    symbol: "👑",
+    rank: 1,
+    maxRank: 10,
+    icon: "👑",
+    color: "#ffd055",
+    desc: "Student council disciplinary chair — strict, proud and unyielding. His iron sense of justice masks a loneliness born from holding everyone, including himself, to impossible standards.",
+    stats: [
+      { label: "Activity",  val: "STUD. COUNCIL" },
+      { label: "Grade",     val: "2ND YR" },
+      { label: "Location",  val: "COUNCIL ROOM" },
+      { label: "Affinity",  val: "NEUTRAL" }
+    ],
+    ref: "0004-EMPR"
+  },
+  {
+    arcana: "THE BATTLE",
+    name: "COMBAT LINK",
+    sub: "Akihiko Sanada",
+    symbol: "🥊",
+    rank: 4,
+    maxRank: 10,
+    icon: "🥊",
+    color: "#c0d0ff",
+    desc: "Senior and SEES veteran. A boxing champion driven by the loss of his sister Miki. He fights not for glory but to grow strong enough that he'll never lose someone again.",
+    stats: [
+      { label: "Arcana",   val: "STAR" },
+      { label: "Weapon",   val: "GLOVES" },
+      { label: "Persona",  val: "CAESAR" },
+      { label: "Status",   val: "ACTIVE" }
+    ],
+    ref: "0007-STAR"
+  },
+  {
+    arcana: "THE HERMIT",
+    name: "INTERNET",
+    sub: "Maya · Online Friend",
+    symbol: "💻",
+    rank: 2,
+    maxRank: 10,
+    icon: "💻",
+    color: "#a0ff80",
+    desc: "A mysterious online contact who provides guidance through the digital void. Their true identity is concealed behind pixels and pseudonyms. Are they who they claim to be?",
+    stats: [
+      { label: "Medium",   val: "PC / WEB" },
+      { label: "Identity", val: "UNKNOWN" },
+      { label: "Location", val: "ONLINE" },
+      { label: "Trust",    val: "BUILDING" }
+    ],
+    ref: "0009-HERM"
+  },
+  {
+    arcana: "THE MOON",
+    name: "DUSK WATCHER",
+    sub: "Nozomi Suemitsu",
+    symbol: "🌕",
+    rank: 2,
+    maxRank: 10,
+    icon: "🌕",
+    color: "#b0aaff",
+    desc: "Self-proclaimed 'Gourmet King' found loitering near Paulownia Mall after dusk. Obsessed with food reviews and rankings. His carefree attitude hides a desperate need for belonging.",
+    stats: [
+      { label: "Grade",    val: "2ND YR" },
+      { label: "Activity", val: "NONE" },
+      { label: "Location", val: "MALL" },
+      { label: "Affinity", val: "AWKWARD" }
+    ],
+    ref: "0012-MOON"
+  },
+  {
+    arcana: "THE SUN",
+    name: "COURAGE",
+    sub: "Akinari Kamiki",
+    symbol: "☀️",
+    rank: 1,
+    maxRank: 10,
+    icon: "☀️",
+    color: "#ffea60",
+    desc: "A terminally ill boy who spends his days under the cherry blossoms of Naganaki Shrine, writing a fable he hopes to finish before time runs out. Every word is borrowed time.",
+    stats: [
+      { label: "Location", val: "SHRINE" },
+      { label: "State",    val: "CRITICAL" },
+      { label: "Pursuit",  val: "WRITING" },
+      { label: "Time",     val: "LIMITED" }
+    ],
+    ref: "0017-SUN"
+  }
+];
+
+let current = 0;
+let flipping = false;
+
+function buildRankPips(rank, maxRank) {
+  const isMax = rank === maxRank;
+  let html = '<span class="rank-text">RANK</span>';
+  for (let i = 0; i < maxRank; i++) {
+    const cls = i < rank ? (isMax ? 'pip maxed' : 'pip filled') : 'pip';
+    html += `<div class="${cls}"></div>`;
+  }
+  return html;
+}
+
+function buildStats(stats) {
+  return stats.map(s => `
+    <div class="stat-pair">
+      <span class="s-label">${s.label}</span>
+      <span class="s-val">${s.val}</span>
+    </div>`).join('');
+}
+
+function updateCard(idx, animate) {
+  const d = LINKS[idx];
+  const flipper = document.getElementById('cardFlipper');
+
+  function applyData() {
+    document.getElementById('cArcana').textContent  = `// ${d.arcana}`;
+    document.getElementById('cTitle').textContent   = d.name;
+    document.getElementById('cSub').textContent     = d.sub;
+    document.getElementById('cSymbol').textContent  = d.symbol;
+    document.getElementById('cRankRow').innerHTML   = buildRankPips(d.rank, d.maxRank);
+    document.getElementById('cDesc').textContent    = d.desc;
+    document.getElementById('cStats').innerHTML     = buildStats(d.stats);
+    document.getElementById('cId').textContent      = `REF // ${d.ref}`;
+
+    // card border color tint
+    const card = flipper.querySelector('.info-card');
+    card.style.borderColor = d.color;
+    card.style.boxShadow   = `0 0 30px ${d.color}22, inset 0 0 60px rgba(0,0,0,0.5)`;
+    flipper.querySelector('.card-bar').style.background =
+      `linear-gradient(180deg, ${d.color}, #00c8ff, transparent)`;
+    flipper.querySelector('.card-bar').style.boxShadow = `0 0 14px ${d.color}`;
+    document.getElementById('cArcana').style.color = d.color;
+  }
+
+  if (!animate) { applyData(); return; }
+
+  flipping = true;
+  flipper.classList.remove('flipping');
+  void flipper.offsetWidth; // reflow
+  flipper.classList.add('flipping');
+
+  // swap data at mid-point (90deg = 275ms in)
+  setTimeout(applyData, 275);
+
+  setTimeout(() => {
+    flipper.classList.remove('flipping');
+    flipping = false;
+  }, 560);
+}
+
+function buildList() {
+  const panel = document.getElementById('listPanel');
+  panel.innerHTML = LINKS.map((d, i) => `
+    <div class="list-item ${i === 0 ? 'active' : ''}" data-idx="${i}">
+      <div class="arcana-icon">${d.icon}</div>
+      <div class="item-info">
+        <div class="item-arcana">${d.arcana}</div>
+        <div class="item-name">${d.name}</div>
+        <div class="item-sub">${d.sub}</div>
+      </div>
+      <div class="rank-block">
+        <div class="rank-label">RANK</div>
+        <div class="rank-val ${d.rank === d.maxRank ? 'maxed' : ''}">${d.rank === d.maxRank ? 'MAX' : d.rank}</div>
+      </div>
+    </div>
+  `).join('');
+
+  panel.querySelectorAll('.list-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.idx);
+      if (idx === current || flipping) return;
+      panel.querySelector('.active').classList.remove('active');
+      el.classList.add('active');
+      current = idx;
+      updateCard(idx, true);
+    });
+  });
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (flipping) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const next = e.key === 'ArrowDown'
+      ? Math.min(current + 1, LINKS.length - 1)
+      : Math.max(current - 1, 0);
+    if (next === current) return;
+    const items = document.querySelectorAll('.list-item');
+    items[current].classList.remove('active');
+    items[next].classList.add('active');
+    items[next].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    current = next;
+    updateCard(next, true);
+  }
+});
+
+// Init
+buildList();
+updateCard(0, false);
+</script>
+</body>
+</html>
