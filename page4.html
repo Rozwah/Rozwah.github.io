@@ -205,9 +205,10 @@
     }
     .top-line-2 {
       width: 75%;
-      margin: 20px auto;
+      margin: 30px auto; /* Increased margin to push it lower */
       height: 2px;
-      background: repeating-linear-gradient(to right, #222 0, #222 20px, transparent 20px, transparent 55px);
+      /* Adjusted spacing for a much denser hashed line */
+      background: repeating-linear-gradient(to right, #222 0, #222 8px, transparent 8px, transparent 18px);
     }
     .top-line-3 {
       width: 100%;
@@ -229,8 +230,9 @@
       pointer-events: none;
     }
     .bottom-text {
-      font-family: sans-serif;
-      font-size: 28px;
+      font-family: 'Courier New', monospace; /* Updated to Courier New */
+      font-size: 24px; /* Adjusted size slightly for Courier's natural width */
+      font-weight: bold;
       color: #111;
     }
     /* ========================================= */
