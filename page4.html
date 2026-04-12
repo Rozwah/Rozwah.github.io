@@ -43,7 +43,7 @@
       position: relative;
       z-index: 1;
       transform-style: preserve-3d;
-      transform: rotateX(68deg) rotateY(-20deg) rotateZ(0deg);
+      transform: rotateX(34deg) rotateY(-20deg) rotateZ(0deg);
       filter: drop-shadow(0 52px 36px rgba(0,0,0,0.32));
     }
 
@@ -158,22 +158,23 @@
     }
     .contact-zone.known:hover::after { opacity: 1; }
 
-    .mountain-wrap { position: absolute; z-index: 18; }
-    .mountain-img-clip {
-      width: 170px; height: 170px;
-      border-radius: 50%;
-      overflow: hidden;
-      box-shadow:
-        0 0 0 1.5px rgba(0,0,0,0.22),
-        0 0 26px 10px rgba(178,178,178,0.88),
-        inset 0 0 16px rgba(0,0,0,0.18);
+    /* Mountain overlay — fixed in screen space, centred, above everything */
+    #mountainOverlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 50;
+      pointer-events: none;
+      width: 280px;
     }
-    .mountain-img-clip img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      object-position: center 30%;
-      filter: grayscale(30%) contrast(1.10);
+    #mountainOverlay img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
+
+
 
     .hud-label {
       position: absolute;
@@ -226,12 +227,12 @@
         <div class="sweep-arm"></div>
       </div>
       <canvas id="pingCanvas" width="520" height="520"></canvas>
-      <div class="mountain-wrap">
-        <div class="mountain-img-clip">
-          <img src="BakuMayenIsland.png" alt="Baku Mayen Island" />
-        </div>
-      </div>
     </div>
+  </div>
+
+  <!-- Mountain sits outside the 3D wrap — flat in screen space, centred over the radar -->
+  <div id="mountainOverlay">
+    <img src="BakuMayenIsland.png" alt="Baku Mayen Island" />
   </div>
 
   <div id="infoPanel">— select a contact —</div>
