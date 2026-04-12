@@ -46,17 +46,23 @@
     .ring {
       position: absolute;
       border-radius: 50%;
-      border: 2px solid #000;
+      border: 1px solid #000;
     }
-    .ring-1 { width: 120px; height: 120px; }
-    .ring-2 { width: 220px; height: 220px; }
+    
+    /* Removed ring-1 and ring-2 */
     .ring-3 { width: 320px; height: 320px; }
     .ring-4 { width: 420px; height: 420px; }
     .ring-5 { width: 510px; height: 510px; }
 
-    .crosshair { position: absolute; background: #000; }
-    .crosshair-h { width: 510px; height: 2px; }
-    .crosshair-v { width: 2px; height: 510px; }
+    .crosshair { 
+      position: absolute; 
+      background: #000; 
+      /* Masks out the 220px center where the inner rings used to be */
+      -webkit-mask-image: radial-gradient(circle, transparent 110px, black 110px);
+      mask-image: radial-gradient(circle, transparent 110px, black 110px);
+    }
+    .crosshair-h { width: 510px; height: 1px; }
+    .crosshair-v { width: 1px; height: 510px; }
 
     .sweep-container {
       position: absolute;
@@ -185,8 +191,6 @@
   <div class="perspective-wrap">
     <div class="radar-stage" id="radarStage">
       <div class="radar-disc"></div>
-      <div class="ring ring-1"></div>
-      <div class="ring ring-2"></div>
       <div class="ring ring-3"></div>
       <div class="ring ring-4"></div>
       <div class="ring ring-5"></div>
