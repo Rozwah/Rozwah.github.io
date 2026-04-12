@@ -20,11 +20,13 @@
       perspective-origin: 50% 46%;
     }
 
+    /* 3D Container */
     .perspective-wrap {
       position: relative;
       z-index: 1;
       transform-style: preserve-3d;
       transform: rotateX(73deg) rotateY(0deg) rotateZ(38deg);
+      pointer-events: none; /* Let clicks pass through to the UI layer */
     }
 
     .radar-stage {
@@ -47,7 +49,6 @@
       position: absolute;
       border-radius: 50%;
       border: 1px solid #000;
-      pointer-events: none;
     }
     
     .ring-3 { width: 320px; height: 320px; }
@@ -57,20 +58,19 @@
     .crosshair { 
       position: absolute; 
       background: #000; 
-      pointer-events: none;
       -webkit-mask-image: radial-gradient(circle, transparent 110px, black 110px);
       mask-image: radial-gradient(circle, transparent 110px, black 110px);
     }
     .crosshair-h { width: 510px; height: 1px; }
     .crosshair-v { width: 1px; height: 510px; }
 
+    /* Sweep */
     .sweep-container {
       position: absolute;
       width: 510px; height: 510px;
       border-radius: 50%;
       overflow: hidden;
       animation: rotateSweep 10s linear infinite;
-      pointer-events: none;
     }
     @keyframes rotateSweep {
       from { transform: rotate(0deg); }
@@ -96,34 +96,45 @@
         rgba(0,0,0,0.0)        360deg
       );
       animation: rotateSweep 10s linear infinite;
-      pointer-events: none;
     }
 
     #pingCanvas {
       position: absolute;
       top: 0; left: 0;
       width: 520px; height: 520px;
-      pointer-events: none;
       z-index: 15;
+    }
+
+    /* Invisible anchors inside the 3D space */
+    .contact-anchor {
+      position: absolute;
+      width: 1px; height: 1px;
+      background: transparent;
+      transform: translate(-50%, -50%);
+    }
+
+    /* FLAT UI LAYER (Where the real buttons live) */
+    #uiLayer {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
     }
 
     .contact-zone {
       position: absolute;
-      z-index: 100; /* High z-index to ensure clickability */
-      width: 32px; height: 32px;
+      width: 34px; height: 34px;
       border-radius: 50%;
       background: transparent;
       border: none;
       cursor: crosshair;
       transform: translate(-50%, -50%);
-      pointer-events: auto; /* Explicitly allow clicks */
+      pointer-events: auto; /* Buttons catch clicks */
       outline: none;
     }
 
-    /* Screen-space Tooltips (Flat) */
     .flat-tooltip {
-      position: fixed;
-      z-index: 200;
+      position: absolute;
       background: rgba(0,0,0,0.85);
       color: #e0e0e0;
       font-family: 'Courier New', monospace;
@@ -132,32 +143,20 @@
       padding: 4px 8px;
       border-radius: 2px;
       pointer-events: none;
-      transform: translate(-50%, -140%);
+      transform: translate(-50%, -160%);
       white-space: nowrap;
       display: none;
     }
 
-    #uiLayer {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 60;
-    }
-
     #mountainOverlay {
       position: fixed;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       z-index: 50;
       pointer-events: none;
       width: 280px;
     }
-    #mountainOverlay img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
+    #mountainOverlay img { width: 100%; height: auto; display: block; }
 
     .hud-label {
       position: absolute;
@@ -182,7 +181,7 @@
       color: rgba(0,0,0,0.38);
       text-transform: uppercase;
       white-space: nowrap;
-      z-index: 100;
+      z-index: 110;
       transition: color 0.22s;
       pointer-events: none;
     }
@@ -225,6 +224,7 @@
   const PING_WIN = 6;
   const DOT_R = 4.5;
   const uiLayer = document.getElementById('uiLayer');
+  const radarStage = document.getElementById('radarStage');
 
   const contacts = [
     { id:'01', angle: 22, radius: 188, label: 'CONTACT 01' },
@@ -246,28 +246,33 @@
     c.scannedOnce = false;
     c.dotBorn = null;
 
-    // Create Hover Zone (In 3D space)
+    // 1. Create Anchor in 3D Space
+    const anchor = document.createElement('div');
+    anchor.className = 'contact-anchor';
+    anchor.style.left = c.pos.x + 'px';
+    anchor.style.top = c.pos.y + 'px';
+    radarStage.appendChild(anchor);
+    c.anchorEl = anchor;
+
+    // 2. Create Button in 2D UI Layer
     const zone = document.createElement('button');
     zone.className = 'contact-zone';
-    zone.style.left = c.pos.x + 'px';
-    zone.style.top = c.pos.y + 'px';
-    document.getElementById('radarStage').appendChild(zone);
+    uiLayer.appendChild(zone);
     c.zoneEl = zone;
 
-    // Create Tooltip (In 2D Screen space)
+    // 3. Create Tooltip in 2D UI Layer
     const tip = document.createElement('div');
     tip.className = 'flat-tooltip';
     tip.textContent = c.label;
     uiLayer.appendChild(tip);
     c.tipEl = tip;
 
+    // Interactions
     zone.addEventListener('mouseenter', () => { if(c.scannedOnce) tip.style.display = 'block'; });
     zone.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
 
     zone.addEventListener('click', (e) => {
-      e.stopPropagation();
       if (!c.scannedOnce) return;
-      
       contacts.forEach(other => other.zoneEl.classList.remove('selected'));
       zone.classList.add('selected');
       
@@ -277,19 +282,25 @@
     });
   });
 
-  // Sync flat tooltips to 3D positions
-  function updateTooltips() {
+  // Sync 2D Elements (Buttons & Tooltips) to 3D Anchors
+  function syncUI() {
     contacts.forEach(c => {
+      const rect = c.anchorEl.getBoundingClientRect();
+      // Move the Button
+      c.zoneEl.style.left = rect.left + rect.width/2 + 'px';
+      c.zoneEl.style.top = rect.top + rect.height/2 + 'px';
+      
+      // Move the Tooltip (offset above the button)
       if (c.tipEl.style.display === 'block') {
-        const rect = c.zoneEl.getBoundingClientRect();
         c.tipEl.style.left = rect.left + rect.width/2 + 'px';
         c.tipEl.style.top = rect.top + 'px';
       }
     });
-    requestAnimationFrame(updateTooltips);
+    requestAnimationFrame(syncUI);
   }
-  updateTooltips();
+  syncUI();
 
+  // Radar Logic
   const canvas = document.getElementById('pingCanvas');
   const ctx = canvas.getContext('2d');
   const rings = [];
@@ -301,7 +312,7 @@
   function draw(now) {
     ctx.clearRect(0, 0, STAGE, STAGE);
     
-    // Rings
+    // Scan Rings
     for (let i = rings.length - 1; i >= 0; i--) {
       const rng = rings[i];
       const age = (now - rng.born) / 700;
@@ -313,7 +324,7 @@
       ctx.stroke();
     }
 
-    // Dots
+    // Scan Dots
     contacts.forEach(c => {
       if (c.dotBorn === null) return;
       const age = now - c.dotBorn;
