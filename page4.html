@@ -47,9 +47,9 @@
       position: absolute;
       border-radius: 50%;
       border: 1px solid #000;
+      pointer-events: none;
     }
     
-    /* Removed ring-1 and ring-2 */
     .ring-3 { width: 320px; height: 320px; }
     .ring-4 { width: 420px; height: 420px; }
     .ring-5 { width: 510px; height: 510px; }
@@ -57,7 +57,7 @@
     .crosshair { 
       position: absolute; 
       background: #000; 
-      /* Masks out the 220px center where the inner rings used to be */
+      pointer-events: none;
       -webkit-mask-image: radial-gradient(circle, transparent 110px, black 110px);
       mask-image: radial-gradient(circle, transparent 110px, black 110px);
     }
@@ -70,6 +70,7 @@
       border-radius: 50%;
       overflow: hidden;
       animation: rotateSweep 10s linear infinite;
+      pointer-events: none;
     }
     @keyframes rotateSweep {
       from { transform: rotate(0deg); }
@@ -95,6 +96,7 @@
         rgba(0,0,0,0.0)        360deg
       );
       animation: rotateSweep 10s linear infinite;
+      pointer-events: none;
     }
 
     #pingCanvas {
@@ -105,42 +107,43 @@
       z-index: 15;
     }
 
-    /* invisible hover zones — always present, always catchable */
     .contact-zone {
       position: absolute;
-      z-index: 20;
-      width: 36px; height: 36px;
+      z-index: 100; /* High z-index to ensure clickability */
+      width: 32px; height: 32px;
       border-radius: 50%;
       background: transparent;
       border: none;
       cursor: crosshair;
       transform: translate(-50%, -50%);
-      padding: 0;
+      pointer-events: auto; /* Explicitly allow clicks */
       outline: none;
     }
 
-    /* tooltip only when hovered and contact is "known" (has been scanned once) */
-    .contact-zone::after {
-      content: attr(data-label);
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.74);
+    /* Screen-space Tooltips (Flat) */
+    .flat-tooltip {
+      position: fixed;
+      z-index: 200;
+      background: rgba(0,0,0,0.85);
       color: #e0e0e0;
       font-family: 'Courier New', monospace;
-      font-size: 8px;
+      font-size: 9px;
       letter-spacing: 0.15em;
-      white-space: nowrap;
-      padding: 3px 7px;
+      padding: 4px 8px;
       border-radius: 2px;
-      opacity: 0;
       pointer-events: none;
-      transition: opacity 0.14s;
+      transform: translate(-50%, -140%);
+      white-space: nowrap;
+      display: none;
     }
-    .contact-zone.known:hover::after { opacity: 1; }
 
-    /* Mountain overlay — fixed in screen space, centred, above everything */
+    #uiLayer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 60;
+    }
+
     #mountainOverlay {
       position: fixed;
       top: 50%;
@@ -208,6 +211,8 @@
     </div>
   </div>
 
+  <div id="uiLayer"></div>
+
   <div id="mountainOverlay">
     <img src="BakuMayenIsland.png" alt="Baku Mayen Island" />
   </div>
@@ -215,167 +220,113 @@
   <div id="infoPanel">— select a contact —</div>
 
 <script>
-  const STAGE     = 520, CX = 260, CY = 260;
+  const STAGE = 520, CX = 260, CY = 260;
   const PERIOD_MS = 10000;
-  const PING_WIN  = 6;
-  const DOT_R     = 4.5;
-  const HOVER_R   = 28;   // px radius for hover reappear detection
-
-  // dot lifetime phases (ms)
-  const HOLD_MS   = 2000;  // stays fully opaque after scan
-  const FADE_MS   = 600;   // fade out duration
-  // hover ghost
-  const GHOST_HOLD_MS = 1200;
-  const GHOST_FADE_MS = 500;
+  const PING_WIN = 6;
+  const DOT_R = 4.5;
+  const uiLayer = document.getElementById('uiLayer');
 
   const contacts = [
-    { id:'01', angle:  22, radius: 188, label: 'CONTACT 01' },
-    { id:'02', angle:  80, radius: 210, label: 'CONTACT 02' },
+    { id:'01', angle: 22, radius: 188, label: 'CONTACT 01' },
+    { id:'02', angle: 80, radius: 210, label: 'CONTACT 02' },
     { id:'03', angle: 140, radius: 175, label: 'CONTACT 03' },
     { id:'04', angle: 195, radius: 200, label: 'CONTACT 04' },
     { id:'05', angle: 255, radius: 182, label: 'CONTACT 05' },
     { id:'06', angle: 310, radius: 205, label: 'CONTACT 06' },
-    { id:'07', angle:  52, radius: 240, label: 'CONTACT 07' },
+    { id:'07', angle: 52, radius: 240, label: 'CONTACT 07' },
   ];
 
   function toXY(a, r) {
     const rad = (a - 90) * Math.PI / 180;
     return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) };
   }
+
   contacts.forEach(c => {
-    c.pos    = toXY(c.angle, c.radius);
-    c.scannedOnce = false; // has been hit by radar at least once
-    // dot state
-    c.dotBorn    = null;   // timestamp of last radar ping
-    c.ghostBorn  = null;   // timestamp of hover-reappear
-    c.ghosting   = false;
+    c.pos = toXY(c.angle, c.radius);
+    c.scannedOnce = false;
+    c.dotBorn = null;
+
+    // Create Hover Zone (In 3D space)
+    const zone = document.createElement('button');
+    zone.className = 'contact-zone';
+    zone.style.left = c.pos.x + 'px';
+    zone.style.top = c.pos.y + 'px';
+    document.getElementById('radarStage').appendChild(zone);
+    c.zoneEl = zone;
+
+    // Create Tooltip (In 2D Screen space)
+    const tip = document.createElement('div');
+    tip.className = 'flat-tooltip';
+    tip.textContent = c.label;
+    uiLayer.appendChild(tip);
+    c.tipEl = tip;
+
+    zone.addEventListener('mouseenter', () => { if(c.scannedOnce) tip.style.display = 'block'; });
+    zone.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+
+    zone.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!c.scannedOnce) return;
+      
+      contacts.forEach(other => other.zoneEl.classList.remove('selected'));
+      zone.classList.add('selected');
+      
+      const info = document.getElementById('infoPanel');
+      info.textContent = `${c.label}  ·  BRG ${String(c.angle).padStart(3,'0')}°  ·  RNG ${c.radius}M`;
+      info.classList.add('active');
+    });
   });
 
-  /* ── ping rings list ── */
+  // Sync flat tooltips to 3D positions
+  function updateTooltips() {
+    contacts.forEach(c => {
+      if (c.tipEl.style.display === 'block') {
+        const rect = c.zoneEl.getBoundingClientRect();
+        c.tipEl.style.left = rect.left + rect.width/2 + 'px';
+        c.tipEl.style.top = rect.top + 'px';
+      }
+    });
+    requestAnimationFrame(updateTooltips);
+  }
+  updateTooltips();
+
+  const canvas = document.getElementById('pingCanvas');
+  const ctx = canvas.getContext('2d');
   const rings = [];
+
   function spawnRing(x, y) {
     rings.push({ x, y, born: performance.now() });
   }
 
-  /* ── canvas + mouse ── */
-  const canvas = document.getElementById('pingCanvas');
-  const ctx    = canvas.getContext('2d');
-  let mouseX = -9999, mouseY = -9999;
-
-  canvas.addEventListener('mousemove', e => {
-    const r = canvas.getBoundingClientRect();
-    mouseX = (e.clientX - r.left) * (STAGE / r.width);
-    mouseY = (e.clientY - r.top)  * (STAGE / r.height);
-  });
-  canvas.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
-
-  /* ── hover zones (invisible, always in DOM) ── */
-  const stage     = document.getElementById('radarStage');
-  const infoPanel = document.getElementById('infoPanel');
-  let   selected  = null;
-
-  contacts.forEach(c => {
-    const zone = document.createElement('button');
-    zone.className     = 'contact-zone';
-    zone.id            = 'zone-' + c.id;
-    zone.dataset.label = c.label;
-    zone.style.left    = c.pos.x + 'px';
-    zone.style.top     = c.pos.y + 'px';
-
-    zone.addEventListener('click', () => {
-      if (!c.scannedOnce) return; // ignore until first scan
-      if (selected && selected !== zone) selected.classList.remove('selected');
-      if (selected === zone) {
-        zone.classList.remove('selected');
-        selected = null;
-        infoPanel.textContent = '— select a contact —';
-        infoPanel.classList.remove('active');
-      } else {
-        zone.classList.add('selected');
-        selected = zone;
-        infoPanel.textContent =
-          c.label + '  ·  BRG ' + String(c.angle).padStart(3,'0') + '°  ·  RNG ' + c.radius + 'M';
-        infoPanel.classList.add('active');
-      }
-    });
-
-    stage.appendChild(zone);
-    c.zoneEl = zone;
-  });
-
-  /* ── dot alpha helper ── */
-  function getDotAlpha(c, now) {
-    // active scan dot
-    if (c.dotBorn !== null) {
-      const age = now - c.dotBorn;
-      if (age < HOLD_MS) return 1;
-      const fadeAge = age - HOLD_MS;
-      if (fadeAge < FADE_MS) return 1 - fadeAge / FADE_MS;
-      // dot expired — clear it
-      c.dotBorn = null;
-    }
-    return 0;
-  }
-
-  function getGhostAlpha(c, now) {
-    if (!c.ghosting || c.ghostBorn === null) return 0;
-    const age = now - c.ghostBorn;
-    if (age < GHOST_HOLD_MS) return 0.55; // dimmer than real dot
-    const fadeAge = age - GHOST_HOLD_MS;
-    if (fadeAge < GHOST_FADE_MS) return 0.55 * (1 - fadeAge / GHOST_FADE_MS);
-    c.ghosting  = false;
-    c.ghostBorn = null;
-    return 0;
-  }
-
-  /* ── draw loop ── */
   function draw(now) {
     ctx.clearRect(0, 0, STAGE, STAGE);
-
-    // ── ping rings
+    
+    // Rings
     for (let i = rings.length - 1; i >= 0; i--) {
       const rng = rings[i];
-      const age = (now - rng.born) / 700; // ring lives 700ms
+      const age = (now - rng.born) / 700;
       if (age >= 1) { rings.splice(i, 1); continue; }
-      const radius = 6 + 18 * age;
-      const alpha  = (1 - age) * 0.65;
       ctx.beginPath();
-      ctx.arc(rng.x, rng.y, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(0,0,0,${alpha})`;
-      ctx.lineWidth   = 1.2;
+      ctx.arc(rng.x, rng.y, 6 + 18 * age, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(0,0,0,${(1 - age) * 0.65})`;
+      ctx.lineWidth = 1.2;
       ctx.stroke();
     }
 
-    // ── dots + hover ghost logic
+    // Dots
     contacts.forEach(c => {
-      const dotAlpha   = getDotAlpha(c, now);
-      const ghostAlpha = getGhostAlpha(c, now);
+      if (c.dotBorn === null) return;
+      const age = now - c.dotBorn;
+      let alpha = 0;
+      if (age < 2000) alpha = 1;
+      else if (age < 2600) alpha = 1 - (age - 2000) / 600;
+      else { c.dotBorn = null; return; }
 
-      // hover check — only when dot has fully gone and first scan happened
-      if (c.scannedOnce && dotAlpha === 0) {
-        const dx = mouseX - c.pos.x, dy = mouseY - c.pos.y;
-        const hovering = Math.sqrt(dx*dx + dy*dy) < HOVER_R;
-
-        if (hovering && !c.ghosting) {
-          // start ghost
-          c.ghosting  = true;
-          c.ghostBorn = now;
-        } else if (!hovering && c.ghosting) {
-          // cursor left — begin fade from wherever ghost is
-          // (getGhostAlpha will handle natural decay, just let it run)
-        }
-      }
-
-      const alpha = Math.max(dotAlpha, getGhostAlpha(c, now));
-      if (alpha <= 0) return;
-
-      // filled dot
       ctx.beginPath();
       ctx.arc(c.pos.x, c.pos.y, DOT_R, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(0,0,0,${alpha})`;
       ctx.fill();
-
-      // specular
+      
       ctx.beginPath();
       ctx.arc(c.pos.x - 1.3, c.pos.y - 1.3, 1.5, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255,255,255,${alpha * 0.35})`;
@@ -383,29 +334,19 @@
     });
   }
 
-  /* ── sweep tracker ── */
   let startTime = null;
-  const pinged  = new Set();
-
-  function normAngle(a) { return ((a % 360) + 360) % 360; }
-
+  const pinged = new Set();
   function tick(ts) {
     if (!startTime) startTime = ts;
-    const fraction = (ts - startTime) % PERIOD_MS / PERIOD_MS;
-    const sweepDeg = normAngle(fraction * 360);
+    const sweepDeg = (((ts - startTime) % PERIOD_MS / PERIOD_MS) * 360) % 360;
 
     contacts.forEach(c => {
-      const diff = normAngle(sweepDeg - c.angle);
+      const diff = (sweepDeg - c.angle + 360) % 360;
       if (diff < PING_WIN && !pinged.has(c.id)) {
         pinged.add(c.id);
-        setTimeout(() => {
-          c.dotBorn   = performance.now();
-          c.ghosting  = false; // cancel any ghost — real dot takes over
-          c.ghostBorn = null;
-          c.scannedOnce = true;
-          c.zoneEl.classList.add('known');
-          spawnRing(c.pos.x, c.pos.y);
-        }, Math.random() * 50);
+        c.dotBorn = performance.now();
+        c.scannedOnce = true;
+        spawnRing(c.pos.x, c.pos.y);
       }
       if (diff > 28) pinged.delete(c.id);
     });
@@ -413,7 +354,6 @@
     draw(ts);
     requestAnimationFrame(tick);
   }
-
   requestAnimationFrame(tick);
 </script>
 </body>
