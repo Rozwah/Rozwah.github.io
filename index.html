@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Archive</title>
+    <style>
+        :root {
+            --shoulder-top: 42%;
+            --shoulder-left: 58%;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #05050a; 
+            overflow: hidden;
+            font-family: 'Brush Script MT', 'Comic Sans MS', cursive, sans-serif;
+        }
+
+        /* --- LAYER 1: THE BACKGROUND & ARM --- */
+        #background-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 56.25vw; /* 16:9 ratio */
+            min-height: 100vh;
+            min-width: 177.78vh; 
+            background: url('background.png') no-repeat center center;
+            background-size: cover;
+            z-index: 1;
+        }
+
+        #shoulder-pivot {
+            position: absolute;
+            top: var(--shoulder-top);
+            left: var(--shoulder-left);
+            width: 0; height: 0;
+        }
+
+        #cat-arm {
+            position: absolute;
+            width: 11vh;   
+            height: 80vh; 
+            left: -12.5vh;   
+            bottom: 0; 
+            background: url('catarm.png') no-repeat bottom center;
+            background-size: contain;
+            
+            transform-origin: 25% 100%; 
+            
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+            pointer-events: none; 
+        }
+
+        /* --- LAYER 2: THE UI (BUTTONS) --- */
+        .nav-arc {
+            position: fixed;
+            top: 18%;
+            right: 5%;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5vh;
+            align-items: flex-end;
+            z-index: 10;
+            width: auto;
+        }
+
+        .menu-btn {
+            color: #d1d9e2; 
+            font-size: clamp(2rem, 8vh, 5rem); 
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.3s, transform 0.3s;
+            white-space: nowrap;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
+            padding: 5px 10px;
+        }
+
+        .menu-btn:hover {
+            color: #ffffff;
+            transform: scale(1.1) translateX(-10px);
+        }
+
+        #link1 { margin-right: 6vmin; }
+        #link2 { margin-right: 4vmin; }
+        #link3 { margin-right: 2vmin; }
+        #link4 { margin-right: 0; }
+
+        /* --- ADDED CREDITS STYLE --- */
+        .credits {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            color: rgba(209, 217, 226, 0.5); 
+            letter-spacing: 1px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        @media (max-aspect-ratio: 1/1) {
+            .nav-arc { top: 12%; right: 3%; }
+            .menu-btn { font-size: 11vw; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="background-layer">
+        <div id="shoulder-pivot">
+            <div id="cat-arm"></div>
+        </div>
+    </div>
+
+    <nav class="nav-arc">
+        <a href="page2.html" class="menu-btn" id="link1">projects</a>
+        <a href="page3.html" class="menu-btn" id="link2">art</a>
+        <a href="page4.html" class="menu-btn" id="link3">files</a>
+        <a href="page5.html" class="menu-btn" id="link4">etc</a>
+    </nav>
+
+    <div class="credits">Art by: łan rad rołcz</div>
+
+    <script>
+        const pivot = document.getElementById('shoulder-pivot');
+        const arm = document.getElementById('cat-arm');
+        const buttons = document.querySelectorAll('.menu-btn');
+        
+        const restAngle = 16.0;  
+        arm.style.transform = `rotate(${restAngle}deg)`;
+
+        buttons.forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                const pivotRect = pivot.getBoundingClientRect();
+                const vh = window.innerHeight / 100;
+                
+                const visualPivotX = pivotRect.left - (12.5 * vh) + (11 * vh * 0.25);
+                const visualPivotY = pivotRect.top; 
+
+                const btnRect = btn.getBoundingClientRect();
+                const targetX = btnRect.left; 
+                const targetY = btnRect.top + (btnRect.height / 2);
+
+                const dx = targetX - visualPivotX;
+                const dy = targetY - visualPivotY;
+                let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                
+                const angleOffset = 78; 
+                
+                arm.style.transform = `rotate(${angle + angleOffset}deg)`;
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                arm.style.transform = `rotate(${restAngle}deg)`;
+            });
+        });
+    </script>
+</body>
+</html>
