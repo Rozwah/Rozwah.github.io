@@ -24,6 +24,13 @@
          0% = fills container edge-to-edge (use when frame PNG has a transparent centre).
          Increase if your frame PNGs are opaque with a solid border. */
       --inset: 0%;
+
+      /* How far the frame PNG extends BEYOND the painting on every side.
+         Ornamental / irregular frames often have transparent outer edges in the PNG,
+         so scaling them to exactly the painting size leaves gaps.
+         This bleeds the frame outward so it always sits on top of the painting.
+         Override per-portrait with:  style="--frame-bleed: 28px;"         */
+      --frame-bleed: 20px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -112,6 +119,16 @@
     @keyframes gFloat   { 0%,100%{transform:translateY(0)}  30%{transform:translateY(-12px)} 65%{transform:translateY(-5px)} }
     @keyframes gTilt    { 0%,100%{transform:rotate(-2.5deg)} 50%{transform:rotate(2.5deg)} }
     @keyframes gBreathe { 0%,100%{transform:scale(1)}        50%{transform:scale(1.05)} }
+
+    /* Flip wrapper — sits between #g-tilt and #g-img.
+       Handles scaleX independently of the breathe/speak animations on #g-img,
+       so the flipped state persists even while animations run on child elements. */
+    #g-flip {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.25s ease;
+    }
+    #g-flip.flipped { transform: scaleX(-1); }
 
     @keyframes gSpeakBob   { 0%,100%{transform:translateY(0)}    50%{transform:translateY(-5px)} }
     @keyframes gSpeakShake {
@@ -299,14 +316,18 @@
 
     /*
       FRAME OVERLAY — sits on top of painting.
-      Should have a transparent centre so the painting shows through.
+      The frame PNG should have a transparent centre so the painting shows through.
+      --frame-bleed pushes the frame image beyond the painting on all four sides,
+      so ornamental or irregularly-shaped frames always overlap the painting edges
+      rather than aligning flush with them.  Set to 0px for a simple flush frame.
     */
     .frame-img {
       position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: fill;   /* stretch to match the container exactly */
+      top:    calc(var(--frame-bleed) * -1);
+      left:   calc(var(--frame-bleed) * -1);
+      width:  calc(100% + var(--frame-bleed) * 2);
+      height: calc(100% + var(--frame-bleed) * 2);
+      object-fit: fill;
       display: block;
       z-index: 2;
       pointer-events: none;
@@ -345,7 +366,9 @@
   <div id="guide">
     <div id="g-float">
       <div id="g-tilt">
-        <img id="g-img" src="face.png" alt="Guide" draggable="false">
+        <div id="g-flip">
+          <img id="g-img" src="face.png" alt="Guide" draggable="false">
+        </div>
       </div>
     </div>
     <div id="g-bubble" role="status" aria-live="polite">
@@ -415,6 +438,7 @@
 
     const guide   = document.getElementById('guide');
     const gTilt   = document.getElementById('g-tilt');
+    const gFlip   = document.getElementById('g-flip');   // flip wrapper, separate from animations
     const gImg    = document.getElementById('g-img');
     const gBubble = document.getElementById('g-bubble');
     const gText   = document.getElementById('g-text');
@@ -463,13 +487,13 @@
 
       if (onLeft) {
         /* ── LEFT → RIGHT ── */
-        gImg.style.transform = 'scaleX(-1)';           // face left (inward)
+        gFlip.classList.add('flipped');                 // face left (inward) — persists via CSS class
         const tx = winW - CHAR_W - EDGE_PAD - Math.random() * 18;
         setPos(tx, ty, '0.55s', '0.40s');
         onLeft = false;
       } else {
         /* ── RIGHT → LEFT ── */
-        gImg.style.transform = '';                      // face right (default / inward)
+        gFlip.classList.remove('flipped');              // face right (default / inward)
         const tx = EDGE_PAD + Math.random() * 18;
         setPos(tx, ty, '0.55s', '0.40s');
         onLeft = true;
