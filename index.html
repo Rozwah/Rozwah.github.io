@@ -365,7 +365,11 @@
   <div class="gallery">
 
     <div class="portrait"
-         data-msg="Now this one... it has a certain weight to it. Look carefully.">
+         data-msgs='[
+           "Now this one... it has a certain weight to it. Look carefully.",
+           "The composition here is no accident. Every element placed with intent.",
+           "Something in the palette tells me this one took the longest."
+         ]'>
       <div class="portrait-frame">
         <img class="paint-img" src="paint1.png" alt="Painting I">
         <img class="frame-img" src="frame1.png" alt="Frame I">
@@ -374,7 +378,11 @@
     </div>
 
     <div class="portrait"
-         data-msg="The centrepiece! I always thought this was the boldest of the three.">
+         data-msgs='[
+           "The centrepiece. Bold, unapologetic. Exactly where it belongs.",
+           "Notice how your eye keeps returning to the centre of this one?",
+           "This is the one I would steal, if I had hands."
+         ]'>
       <div class="portrait-frame">
         <img class="paint-img" src="paint2.png" alt="Painting II">
         <img class="frame-img" src="frame2.png" alt="Frame II">
@@ -383,7 +391,11 @@
     </div>
 
     <div class="portrait"
-         data-msg="This last one is quieter. The more you look, the more it gives.">
+         data-msgs='[
+           "Quieter than the others. The more you look, the more it gives.",
+           "The restraint in this piece is what makes it powerful.",
+           "I always feel like this one is watching back."
+         ]'>
       <div class="portrait-frame">
         <img class="paint-img" src="paint3.png" alt="Painting III">
         <img class="frame-img" src="frame3.png" alt="Frame III">
@@ -407,17 +419,21 @@
     const gBubble = document.getElementById('g-bubble');
     const gText   = document.getElementById('g-text');
 
-    const CHAR_W  = 92;
+    const CHAR_W    = 92;
+    const EDGE_PAD  = 20;   // px gap from screen edge when docked
 
-    /* ── Position ── */
-    let posX      = 22 + Math.random() * 25;
-    let posY      = 18 + Math.random() * 18;
-    let isRunning = false;
+    /* ── State ── */
+    let posX      = EDGE_PAD + Math.random() * 25;
+    let posY      = EDGE_PAD + Math.random() * 18;
+    let onLeft    = true;    // which side the character is docked on
+    let isMoving  = false;   // true during the slide-across animation
     let isSpeaking= false;
     let lastMsg   = '';
     let typeIv    = null;
     let hideTO    = null;
+    let driftTO   = null;
 
+    /* ── Position helper ── */
     function setPos(x, y, durX = '0s', durY = '0s', ease = 'cubic-bezier(0.25,0.46,0.45,0.94)') {
       guide.style.transitionProperty       = 'left, top';
       guide.style.transitionDuration       = `${durX}, ${durY}`;
@@ -429,55 +445,60 @@
 
     setPos(posX, posY);
 
-    /* ── Run away on click ── */
+    /* ── TOGGLE SIDE on click ── */
     gTilt.addEventListener('click', e => {
       e.stopPropagation();
-      if (isRunning) return;
-      flee();
+      if (isMoving) return;
+      toggleSide();
     });
 
-    function flee() {
-      isRunning = true;
+    function toggleSide() {
+      isMoving = true;
       hideBubble(true);
       guide.classList.remove('speaking');
       guide.classList.add('running');
-      gImg.style.transform = 'scaleX(-1)';
 
       const winW = window.innerWidth;
-      const winH = window.innerHeight;
-      const tx = winW - CHAR_W - 24 - Math.random() * Math.max(0, winW * 0.22);
-      const ty = 18 + Math.random() * Math.min(winH * 0.3, 200);
+      const ty   = EDGE_PAD + Math.random() * 20;
 
-      setPos(tx, ty, '0.42s', '0.30s');
+      if (onLeft) {
+        /* ── LEFT → RIGHT ── */
+        gImg.style.transform = 'scaleX(-1)';           // face left (inward)
+        const tx = winW - CHAR_W - EDGE_PAD - Math.random() * 18;
+        setPos(tx, ty, '0.55s', '0.40s');
+        onLeft = false;
+      } else {
+        /* ── RIGHT → LEFT ── */
+        gImg.style.transform = '';                      // face right (default / inward)
+        const tx = EDGE_PAD + Math.random() * 18;
+        setPos(tx, ty, '0.55s', '0.40s');
+        onLeft = true;
+      }
 
+      /* Settle after slide completes */
       setTimeout(() => {
-        gImg.style.transform = '';
-        const hx = 18 + Math.random() * 38;
-        const hy = 16 + Math.random() * 22;
-        setPos(hx, hy, '1.5s', '1.1s', 'ease-in-out');
-
-        setTimeout(() => {
-          isRunning = false;
-          guide.classList.remove('running');
-          setTimeout(() => { if (!isSpeaking && !isRunning) greet(); }, 900);
-        }, 1500);
-      }, 2400);
+        isMoving = false;
+        guide.classList.remove('running');
+        updateBubbleSide();   // re-orient bubble for new position
+        scheduleDrift();      // restart drift on correct side
+      }, 600);
     }
 
-    /* ── Speech bubble ── */
-    function updateSide() {
-      const rightClear = window.innerWidth - (posX + CHAR_W);
-      gBubble.classList.toggle('flip', rightClear < 260);
+    /* ── Speech bubble side ── */
+    function updateBubbleSide() {
+      /* Bubble flips to the opposite side of the character so it points inward */
+      gBubble.classList.toggle('flip', !onLeft);
     }
 
+    /* ── Show / hide bubble ── */
     function showBubble(msg) {
-      if (isRunning) return;
+      if (isMoving) return;
       if (msg === lastMsg && gBubble.classList.contains('visible')) return;
       lastMsg = msg;
 
       clearInterval(typeIv);
       clearTimeout(hideTO);
-      updateSide();
+      updateBubbleSide();
 
       gText.textContent = '';
       gBubble.classList.add('visible');
@@ -505,39 +526,46 @@
       else hideTO = setTimeout(doHide, 650);
     }
 
-    /* ── Messages ── */
-    const MSGS = {
-      DIV:     ["Interesting section.", "Something lives inside here.", "A container of possibilities."],
-      IMG:     ["A picture! Worth an unknowable number of words.", "Visual content — my personal favourite.", "Someone chose this image deliberately."],
-      default: ["Hmm, curious. I wonder what that does.", "Found something! Keep exploring.", "I'm watching your every hover..."],
-    };
-
+    /* ── Per-portrait message pools ── */
     function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
     function msgFor(el) {
+      /* data-msgs: JSON array of strings — picks one at random each hover */
+      if (el.dataset && el.dataset.msgs) {
+        try {
+          const arr = JSON.parse(el.dataset.msgs);
+          if (Array.isArray(arr) && arr.length) return rnd(arr);
+        } catch (e) { /* fall through */ }
+      }
+      /* Fallback single message */
       if (el.dataset && el.dataset.msg) return el.dataset.msg;
-      return rnd(MSGS[el.tagName] || MSGS.default);
+      return rnd(["Hover each painting and I'll tell you what I notice.",
+                  "Something worth looking at, don't you think?",
+                  "Art speaks to everyone differently."]);
     }
 
-    /* ── Hover on portraits ── */
+    /* ── Hover listeners on portraits ── */
     document.querySelectorAll('.portrait').forEach(el => {
       el.addEventListener('mouseenter', () => showBubble(msgFor(el)));
       el.addEventListener('mouseleave', () => hideBubble());
     });
 
-    /* ── Ambient drift (top-left quadrant) ── */
+    /* ── Ambient drift — stays on whichever side is current ── */
     function scheduleDrift() {
-      setTimeout(() => {
-        if (!isRunning && !isSpeaking) {
-          setPos(
-            14 + Math.random() * 50,
-            14 + Math.random() * 40,
-            '2.8s', '2.2s', 'ease-in-out'
-          );
+      clearTimeout(driftTO);
+      driftTO = setTimeout(() => {
+        if (!isMoving && !isSpeaking) {
+          const winW = window.innerWidth;
+          const nx = onLeft
+            ? EDGE_PAD + Math.random() * 50
+            : winW - CHAR_W - EDGE_PAD - Math.random() * 50;
+          const ny = EDGE_PAD + Math.random() * 40;
+          setPos(nx, ny, '2.8s', '2.2s', 'ease-in-out');
         }
         scheduleDrift();
       }, 6000 + Math.random() * 5000);
     }
+
     scheduleDrift();
 
     /* ── Opening greeting ── */
@@ -548,12 +576,10 @@
       "The paintings are alive if you look long enough. Or so I hear.",
     ];
 
-    function greet() {
+    setTimeout(() => {
       showBubble(rnd(GREETINGS));
       setTimeout(() => hideBubble(), 5500);
-    }
-
-    setTimeout(greet, 850);
+    }, 850);
 
   })();
   </script>
